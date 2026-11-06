@@ -15,16 +15,21 @@ Build one continuous event in which the viewer can track a form, a material, or 
 4. Give every unmatched part a fate: merge, split, retract, absorb, or leave behind. Never leave a source part and its replacement on screen together.
 5. Write `plan.json` next to the scene with parts, mappings, timed beats, effects, constraints, and risks phrased as a viewer would see them.
 
-## Pick the representation
+## Pick the mechanism
+
+Read [references/effect-catalog.md](references/effect-catalog.md). It lists ten mechanisms, each with a runnable demo, what the viewer reads it as, and when it fits. In short:
 
 | Effect | Use |
 | --- | --- |
 | Organic bodies, limbs, liquid, melt, split/merge, topology change | **SDF part field** (`renderers/sdf-gl.ts` + `effects/skeleton.ts`). This is the default. Read [references/sdf-field.md](references/sdf-field.md). |
-| Matching simple outlines | Contour rings (`effects/contour.ts`, Flubber) |
+| Brittle or painted objects breaking and rebuilding | Voronoi shards (`effects/fracture.ts`) with two-faced pieces |
+| Line art, neon, wire | One continuous polyline resampled on both shapes, peeled through a flight curve |
+| Something growing into the target | Space colonization (`effects/growth.ts`) |
 | Dissolve into grains and reassemble | Particle tracks (`effects/particles.ts`), routed through a legible intermediate formation such as an orbit, not a straight cloud |
-| True depth and volume | Three.js layer (`renderers/three.ts`) with compatible procedural meshes |
+| True depth and volume, solids | Raymarched 3D SDF via `renderers/shader-layer.ts`, or Three.js meshes (`renderers/three.ts`) |
+| Matching simple outlines | Contour rings (`effects/contour.ts`, Flubber) |
 
-These representations compose because they share one clock and one 2D canvas. Draw them as successive layers within the same `draw(ctx, t)`.
+These mechanisms compose because they share one clock and one 2D canvas. Draw them as successive layers within the same `draw(ctx, t)`, and hand off on a carrier visible in both.
 
 ## Build and verify
 

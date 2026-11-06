@@ -1,7 +1,7 @@
 import "./style.css";
 import { renderAt, type MorphScene } from "../packages/morph-engine/src/core/scene";
 
-const modules = import.meta.glob<{ scene: MorphScene }>(["../demos/*/scene.ts", "../examples/*/scene.ts"], { eager: true });
+const modules = import.meta.glob<{ scene: MorphScene }>(["../demos/*/scene.ts", "../examples/*/scene.ts", "../lab/*/scene.ts"], { eager: true });
 const scenes = Object.values(modules).map(({ scene }) => scene);
 const stage = document.querySelector<HTMLCanvasElement>("#stage")!;
 const context = stage.getContext("2d", { alpha: false })!;

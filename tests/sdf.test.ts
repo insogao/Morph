@@ -45,3 +45,26 @@ test("rigid transform keeps halfplane membership", () => {
   const p = [c * dx - sn * dy + 13, sn * dx + c * dy + 2];
   assert.ok(s.nx * p[0] + s.ny * p[1] < s.offset);
 });
+
+import { area, fracture, matchCells, resampleClosed } from "../packages/morph-engine/src/effects/fracture";
+import { colonize } from "../packages/morph-engine/src/effects/growth";
+
+const square: [number, number][] = [[0, 0], [100, 0], [100, 100], [0, 100]];
+
+test("fracture tiles the outline without losing area", () => {
+  const cells = fracture(square, 20, 3);
+  const total = cells.reduce((s, c) => s + Math.abs(area(c)), 0);
+  assert.ok(Math.abs(total - 10000) < 1, "area " + total);
+  assert.deepEqual(fracture(square, 20, 3), cells, "deterministic");
+  const match = matchCells(cells, fracture(square, 20, 9));
+  assert.equal(new Set(match.filter(j => j >= 0)).size, match.filter(j => j >= 0).length, "one-to-one");
+  assert.equal(resampleClosed(cells[0], 16).length, 16);
+});
+
+test("space colonization stays deterministic and reaches the outline", () => {
+  const a = colonize(square, [50, 160], { seed: 2, attractors: 200 });
+  const b = colonize(square, [50, 160], { seed: 2, attractors: 200 });
+  assert.equal(a.nodes.length, b.nodes.length);
+  assert.ok(a.nodes.some(n => n.p[1] < 30), "branches reach the top of the outline");
+  assert.ok(a.nodes[0].radius > a.nodes.at(-1)!.radius, "pipe model thickens the root");
+});
