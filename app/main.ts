@@ -58,12 +58,16 @@ function play(nextDirection = 1) {
   playing = true;
   playButton.textContent = direction > 0 ? "暂停" : "播放";
   if (direction < 0) reverseButton.setAttribute("aria-pressed", "true");
-  const start = performance.now();
+  // Anchor the clock to the first frame's own timestamp. A rAF timestamp can be earlier than
+  // performance.now() at click time, which used to yield a negative time and stop playback at once.
+  let start = -1;
   const from = time;
   function tick(now: number) {
-    const next = from + direction * (now - start) / 1000;
+    if (start < 0) start = now;
+    const next = from + direction * Math.max(0, now - start) / 1000;
     seek(next);
-    if (next <= 0 || next >= current.duration) pause();
+    const ended = direction > 0 ? next >= current.duration : next <= 0;
+    if (ended) pause();
     else animation = requestAnimationFrame(tick);
   }
   animation = requestAnimationFrame(tick);

@@ -17,4 +17,4 @@ node tools/frames.mjs umbrella-octopus 2.5 3 3.5   # 指定时刻对比
 npm run export -- umbrella-octopus --width 1920
 ```
 
-方案与路线见 `docs/roadmap.md`，Skill 入口见 `skills/creative-morph/SKILL.md`。
+交接与进度见 `docs/HANDOFF.md`，方案与路线见 `docs/roadmap.md`，Skill 入口见 `skills/creative-morph/SKILL.md`。
