@@ -1,0 +1,46 @@
+{
+  "id": "ink-bird",
+  "title": "纸上起飞",
+  "duration": 7,
+  "source": {
+    "name": "墨滴",
+    "parts": [
+      { "id": "reservoir", "description": "圆形墨滴，主要体积" },
+      { "id": "trail", "description": "拉伸的液体尾迹", "parent": "reservoir" },
+      { "id": "lobes", "description": "双侧分叉的湿墨", "parent": "reservoir" }
+    ]
+  },
+  "target": {
+    "name": "飞鸟",
+    "parts": [
+      { "id": "body", "description": "细长鸟身及喙" },
+      { "id": "tail", "description": "分叉的尾羽", "parent": "body" },
+      { "id": "left", "description": "近侧展翼", "parent": "body" },
+      { "id": "right", "description": "远侧展翼", "parent": "body" }
+    ]
+  },
+  "candidates": [
+    { "name": "湿墨分叉", "approach": "墨滴下坠后横向分叉，再长出初级飞羽", "tradeoff": "翼根和墨池必须重叠，才能自然换到结构化轮廓" },
+    { "name": "结构折纸", "approach": "墨滴压成平面，再折出两翼", "tradeoff": "角度清楚，但湿墨变成纸的动机较弱" },
+    { "name": "粒子成鸟", "approach": "墨滴甩出两股粒子并汇聚到翼尖", "tradeoff": "粒子华丽，主体容易在中途变得不清楚" }
+  ],
+  "selected": "湿墨分叉",
+  "mappings": [
+    { "from": ["reservoir"], "to": ["body"], "carry": "深绿黑墨的中心和主体质量" },
+    { "from": ["trail"], "to": ["tail"], "carry": "拖拽方向和分叉轮廓" },
+    { "from": ["lobes"], "to": ["left", "right"], "carry": "两侧湿墨通过各自翼根继续拉伸" }
+  ],
+  "beats": [
+    { "at": 0, "event": "纸上悬着一滴墨", "effects": ["implicit-field"] },
+    { "at": 1.5, "event": "墨滴坠下并拉出尾迹", "effects": ["implicit-field"] },
+    { "at": 2.5, "event": "左右墨瓣在同一墨池分叉，翼根开始外展", "effects": ["implicit-field", "semantic-part"] },
+    { "at": 4.05, "event": "边缘伸出飞羽，鸟头和尾羽形成", "effects": ["semantic-part", "contour"] },
+    { "at": 5.2, "event": "鸟振翅越过日轮，带起零星墨点", "effects": ["rig", "secondary-particles"] },
+    { "at": 7, "event": "飞鸟保持清楚轮廓", "effects": ["rig"] }
+  ],
+  "constraints": ["墨与鸟共用一个质心和同一墨色范围", "翼根自湿墨开始始终有连接", "尾声至少保留一次完整振翅"],
+  "risks": [
+    { "failure": "头和翼根重叠，结尾读成蝙蝠", "fallback": "让喙伸出前缘，并用羽片和分叉尾部加强鸟的结构" },
+    { "failure": "墨池在轮廓接替时收缩成孤岛", "fallback": "前移主体生长时间并扩展中段场的重叠范围" }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "volume-vessel",
+  "title": "From solid to hollow",
+  "duration": 7.4,
+  "source": {
+    "name": "琥珀色蜡球",
+    "parts": [
+      { "id": "ball", "description": "实心外观的回转球体" },
+      { "id": "crown", "description": "球的顶部，含收在顶点的内壁环", "parent": "ball" },
+      { "id": "equator", "description": "球的中部，暂时压扁后向上拉伸", "parent": "ball" },
+      { "id": "base", "description": "始终与托盘接触的下极", "parent": "ball" }
+    ]
+  },
+  "target": {
+    "name": "青釉宽口陶器",
+    "parts": [
+      { "id": "body", "description": "腹部丰满、肩部收紧的连续外壁" },
+      { "id": "foot", "description": "固定接触面的圈足", "parent": "body" },
+      { "id": "rim", "description": "略有波动、带有厚度的外翻口沿", "parent": "body" },
+      { "id": "cavity", "description": "从口沿连续向下的内壁与器底", "parent": "rim" }
+    ]
+  },
+  "candidates": [
+    {
+      "name": "连续回转截面",
+      "approach": "让外壁随同一组经线点拉伸，内壁初始收在球顶，口沿张开后沿器身向下展开。",
+      "tradeoff": "保留了点的对应关系与可逆性，最适合拉坯类回转体。"
+    },
+    {
+      "name": "体积场挖空",
+      "approach": "在实时隐式距离场上减去不断伸长的内腔，再重建表面。",
+      "tradeoff": "可处理非回转腔体，软件 WebGL 中的高分辨率离线导出成本更高。"
+    },
+    {
+      "name": "壳片翻卷",
+      "approach": "球壳分为数片，在顶部外翻后围合成器壁。",
+      "tradeoff": "适合表现接缝与装配，开口过程较像外壳翻折，拉坯的连续性较弱。"
+    }
+  ],
+  "selected": "连续回转截面",
+  "mappings": [
+    { "from": ["base"], "to": ["foot"], "carry": "保留同一托盘接触高度，接触点向外扩成器足。" },
+    { "from": ["equator"], "to": ["body"], "carry": "纬圈保留相对顺序，先受压后恢复高度并拉出颈肩。" },
+    { "from": ["crown"], "to": ["rim", "cavity"], "carry": "同一顶点附近的环从零半径张开，分别形成卷边和向下延伸的内壁。" }
+  ],
+  "beats": [
+    { "at": 0, "event": "工作台上完整呈现带反光的蜡球，实时剖面呈圆形。", "effects": ["mesh-morph"] },
+    { "at": 0.94, "event": "球体沿纵轴压扁，接触高度保持固定。", "effects": ["mesh-morph"] },
+    { "at": 2.12, "event": "冠部先变尖再拉成颈部，顶端环扩为可见的器口。", "effects": ["mesh-morph"] },
+    { "at": 2.56, "event": "内壁由口沿向下展开，现场剖面同时显示腔体深度。", "effects": ["mesh-morph", "compositor"] },
+    { "at": 3.42, "event": "青釉沿器身向上走，几何与表面参数独立推进。", "effects": ["material-transition"] },
+    { "at": 4.83, "event": "腔体成形，镜头升高并绕拍，露出有深度的内壁。", "effects": ["mesh-morph", "secondary-motion"] },
+    { "at": 7.4, "event": "末帧保留器口、圈足和偏转视角，反光与内外壁均可辨。", "effects": ["secondary-motion"] }
+  ],
+  "constraints": [
+    "网格索引恒定，每次定位都由绝对时间重算顶点、法线和颜色。",
+    "托盘接触高度固定，内壁半径按同高度外壁向内扣减。",
+    "不加载外部模型、纹理、环境图或生成视频。",
+    "使用 WebGL 2，软件渲染的确定性在同一 Chromium 配置中验收。"
+  ],
+  "risks": [
+    { "failure": "初始顶点坍缩造成球顶高光裂纹。", "fallback": "内壁在开口前保持零半径，并用环索引首尾相接来保持经线方向的平滑法线。" },
+    { "failure": "腔体看起来像贴图。", "fallback": "镜头升高并绕拍，观察真实口沿遮挡和内壁反光，左侧显示实时几何剖面。" },
+    { "failure": "反复定位导致显存增长。", "fallback": "重用同一组位置、法线和颜色缓冲，在页面离开时释放几何、材质和 WebGL 上下文。" }
+  ]
+}

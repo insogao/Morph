@@ -46,5 +46,5 @@ export function frameTime(index: number, count: number, duration: number): numbe
   if (!Number.isInteger(index) || !Number.isInteger(count) || count < 2 || index < 0 || index >= count) {
     throw new RangeError("Frame index is outside the timeline.");
   }
-  return index * duration / (count - 1);
+  return (index / (count - 1)) * duration;
 }

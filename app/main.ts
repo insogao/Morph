@@ -16,7 +16,7 @@ const request = new URLSearchParams(location.search);
 const renderMode = request.get("render") === "1";
 if (renderMode) document.body.classList.add("render");
 
-let current = scenes.find(scene => scene.id === request.get("scene")) ?? scenes[0];
+let current = scenes.find(scene => scene.id === (request.get("scene") ?? document.body.dataset.defaultScene)) ?? scenes[0];
 let time = 0;
 let direction = 1;
 let animation = 0;

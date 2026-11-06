@@ -1,0 +1,73 @@
+{
+  "id": "flower-butterfly",
+  "title": "Papilio ex flora",
+  "duration": 7.6,
+  "source": {
+    "name": "八瓣花形标本",
+    "parts": [
+      { "id": "corolla", "description": "花冠，由八瓣相互搭接的花瓣组成" },
+      { "id": "petals", "description": "八个分组，分别有从瓣尖到瓣根的粒子释放顺序", "parent": "corolla" },
+      { "id": "pistil", "description": "暖色花心，是收拢方向的视觉锚点" },
+      { "id": "stem", "description": "弯曲的花茎和可向茎折叠的两片叶子" }
+    ]
+  },
+  "target": {
+    "name": "燕尾蝶形标本",
+    "parts": [
+      { "id": "thorax", "description": "身体中轴，连接四片翅膀" },
+      { "id": "forewings", "description": "两片青绿色前翅，放射状翅脉和浅色边点", "parent": "thorax" },
+      { "id": "hindwings", "description": "两片带尾突的后翅，根部保留珊瑚色和眼斑", "parent": "thorax" },
+      { "id": "antennae", "description": "一对从头部连续伸出的触角", "parent": "thorax" }
+    ]
+  },
+  "candidates": [
+    {
+      "name": "标本落粉",
+      "approach": "从瓣尖剥离色粒，沿同侧涡带搬运至对应翅片，在落点沉积出翅脉与眼斑。",
+      "tradeoff": "需要每组分别匹配采样密度和落点顺序，避免形成不连通的翅缘。"
+    },
+    {
+      "name": "花冠折展",
+      "approach": "将八瓣分组折叠为四个连续翼面，瓣脉转成翅脉。",
+      "tradeoff": "部件关系最易读，颗粒解散和重组的视觉事件会较弱。"
+    },
+    {
+      "name": "花瓣浮印",
+      "approach": "先让四瓣在镜像轴附近交换位置，剩下四瓣像印刷色版般叠合为翅纹。",
+      "tradeoff": "图案层次清晰，空间搬运短，变形会更接近平面图解。"
+    }
+  ],
+  "selected": "标本落粉",
+  "mappings": [
+    {
+      "from": ["petals"],
+      "to": ["forewings", "hindwings"],
+      "carry": "每两瓣对应一翅。粒子保留来源分组，暖色在后翅留存，前翅色粒在飞行过程中转青。"
+    },
+    {
+      "from": ["pistil", "stem"],
+      "to": ["thorax", "antennae"],
+      "carry": "花心移向翅根会合点，叶片向茎折叠，弯曲的茎收短为中轴，躯干增宽后从头部抽出触角。"
+    }
+  ],
+  "beats": [
+    { "at": 0, "event": "深绿植物图版中完整呈现花冠、花心、叶片和茎。", "effects": ["semantic-parts"] },
+    { "at": 1.05, "event": "迎风侧瓣尖先散，其他花瓣错峰剥落，色粒与剥落前缘同步。", "effects": ["semantic-parts", "particle-morph"] },
+    { "at": 2.15, "event": "叶片折回茎部，花茎上提，色粒沿左右分开的曲线绕过中轴。", "effects": ["semantic-parts", "particle-morph"] },
+    { "at": 3.5, "event": "靠近翅根的色粒开始沉积，翅纹只出现在已落点的范围内。", "effects": ["particle-morph", "compositor"] },
+    { "at": 4.84, "event": "缩短的茎转为蝶身，随着翅缘铺满，腹节和触角依次成形。", "effects": ["semantic-parts", "particle-morph"] },
+    { "at": 5.54, "event": "四翅展开后开始扑动，前后翅相位略错开，蝶身斜向上移。", "effects": ["secondary-motion"] },
+    { "at": 7.6, "event": "末帧在较开阔的翼形停住，翅脉、眼斑和双触角可辨。", "effects": ["secondary-motion"] }
+  ],
+  "constraints": [
+    "粒子的起止点通过语义分组匹配，正反向定位均由绝对时间计算。",
+    "花瓣的固体边缘退出与对应粒子的离开用同一时间函数。",
+    "目标翅纹只有在粒子落点的沉积范围内显露，完成翼面后才允许整体扇动。",
+    "背景版式不参与形变，绘图过程中相机固定。"
+  ],
+  "risks": [
+    { "failure": "目标轮廓薄尖留孔或最后一帧突然补边。", "fallback": "沿目标周界增加采样，并使末粒沉积半径增长结束早于起飞。" },
+    { "failure": "形变过程只看到杂乱飞散。", "fallback": "缩小随机扰动，按左右语义组设置相反弯曲方向，按翅根到翅尖依次着陆。" },
+    { "failure": "末帧处在翅膀最窄的时相。", "fallback": "在末段降低振幅，使双翅重新展开。" }
+  ]
+}

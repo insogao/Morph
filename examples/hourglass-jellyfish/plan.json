@@ -1,0 +1,56 @@
+{
+  "id": "hourglass-jellyfish",
+  "title": "潮汐漏刻",
+  "duration": 6.6,
+  "source": {
+    "name": "悬在深海中的旧铜沙漏",
+    "parts": [
+      {"id": "hourglass", "description": "完整的双锥剪影和微微旋摆的轴线"},
+      {"id": "upper-chamber", "parent": "hourglass", "description": "上半铜座、玻璃和悬着的细沙"},
+      {"id": "lower-chamber", "parent": "hourglass", "description": "下半铜座、玻璃和沉积的沙丘"},
+      {"id": "crown-sand", "parent": "upper-chamber", "description": "较细的亮金沙，靠近分开的漏口先流出"},
+      {"id": "strand-sand", "parent": "lower-chamber", "description": "较暗的颗粒从沙丘沿玻璃内壁攀出"}
+    ]
+  },
+  "target": {
+    "name": "带铜金微光的深海水母",
+    "parts": [
+      {"id": "jellyfish", "description": "由伞膜驱动的游动姿态"},
+      {"id": "bell", "parent": "jellyfish", "description": "由金色流线首先围出的发光伞膜"},
+      {"id": "oral-arms", "parent": "jellyfish", "description": "汇在伞口后垂落的液态口腕"},
+      {"id": "tentacles", "parent": "jellyfish", "description": "沿多个流线落点展开的细触丝"},
+      {"id": "receding-shell", "description": "沿画面左侧退入暗部的上下两截旧铜框"}
+    ]
+  },
+  "candidates": [
+    {"name": "铜框折展", "approach": "让支撑柱变成伞膜的辐射骨架。", "tradeoff": "几何关系清楚，但旧铜会变成主要转化物，沙粒的去向偏弱。"},
+    {"name": "液滴折射", "approach": "让漏口流出一股连续的液体并鼓成伞。", "tradeoff": "体积连续，但沙粒只能从亮点辨认。"},
+    {"name": "双沙流织合", "approach": "上下沙舱在漏口分开，上方流束织伞，下方流束分到口腕和触丝。", "tradeoff": "需要分配清楚的到达次序与轨道，粒子归位后才有完整伞缘。"}
+  ],
+  "selected": "双沙流织合",
+  "mappings": [
+    {"from": ["upper-chamber", "lower-chamber"], "to": ["receding-shell"], "carry": "两半保留铆钉、铜圈与各自的旋转方向。"},
+    {"from": ["crown-sand"], "to": ["bell"], "carry": "细沙以金光描出一片逐渐鼓起的弧线，成为伞口滚边。"},
+    {"from": ["strand-sand"], "to": ["oral-arms", "tentacles"], "carry": "较低的流束分成数股，较密一股在伞下熔接，细股沿触丝继续漂浮。"}
+  ],
+  "beats": [
+    {"at": 0, "event": "侧前方深海光照出旧铜沙漏，沙漏轻晃。", "effects": ["part-transforms", "ambient-depth"]},
+    {"at": 0.58, "event": "腰部松动，两半铜框与玻璃缓慢旋开。", "effects": ["part-transforms"]},
+    {"at": 1.3, "event": "沙粒穿过两截玻璃之间的空隙，抛出两股亮线。", "effects": ["particle-transport"]},
+    {"at": 2.42, "event": "最先到达的沙粒描出伞缘，伞顶从薄弧鼓起。", "effects": ["contour-morph", "particle-transport"]},
+    {"at": 3.06, "event": "下方亮点拉成细带，靠近的凝结块接成透明口腕。", "effects": ["liquid-field", "particle-transport"]},
+    {"at": 4.15, "event": "伞膜第一次有力收缩，水母向右上方游开，触丝滞后。", "effects": ["part-transforms", "particle-transport", "liquid-field"]},
+    {"at": 6.6, "event": "水母仍在游动，留下一线能辨认的金色伞缘。", "effects": ["part-transforms", "contour-morph"]}
+  ],
+  "constraints": [
+    "无声，16:9，交付时以 30 fps 为默认。",
+    "沙漏留在画面左侧，水母先在右侧亮处成形，再向右上方游动。",
+    "颗粒轨迹、口腕和伞缘共用一条可任意定位的时间轴，端点随各自部件移动。",
+    "铜框靠位移与景深退入水里，保留两截之间的可见空间。"
+  ],
+  "risks": [
+    {"failure": "颗粒同时涌出，盖住漏口，难以看出沙漏先分开。", "fallback": "把细沙与沉积沙的释放错开，限制同组流线的偏移。"},
+    {"failure": "口腕的隐式轮廓间歇出现尖点或断节。", "fallback": "让凝结块相互覆盖半个半径，渐进提高连接处的场强。"},
+    {"failure": "水母在完成前就大幅移动，粒子看似追逐外物。", "fallback": "第一阵脉动延后到伞缘稳定时，剩余粒子的目标端随水母移动。"}
+  ]
+}

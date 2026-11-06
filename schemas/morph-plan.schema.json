@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Creative Morph Plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "duration", "source", "target", "candidates", "selected", "mappings", "beats", "constraints", "risks"],
+  "properties": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "title": {"$ref": "#/$defs/text"},
+    "duration": {"type": "number", "exclusiveMinimum": 0},
+    "source": {"$ref": "#/$defs/subject"},
+    "target": {"$ref": "#/$defs/subject"},
+    "candidates": {
+      "type": "array", "minItems": 3, "items": {
+        "type": "object", "required": ["name", "approach", "tradeoff"], "additionalProperties": false,
+        "properties": {"name": {"$ref": "#/$defs/text"}, "approach": {"$ref": "#/$defs/text"}, "tradeoff": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "selected": {"$ref": "#/$defs/text"},
+    "mappings": {
+      "type": "array", "minItems": 1, "items": {
+        "type": "object", "required": ["from", "to", "carry"], "additionalProperties": false,
+        "properties": {"from": {"$ref": "#/$defs/textList"}, "to": {"$ref": "#/$defs/textList"}, "carry": {"$ref": "#/$defs/text"}}
+      }
+    },
+    "beats": {
+      "type": "array", "minItems": 2, "items": {
+        "type": "object", "required": ["at", "event", "effects"], "additionalProperties": false,
+        "properties": {"at": {"type": "number", "minimum": 0}, "event": {"$ref": "#/$defs/text"}, "effects": {"$ref": "#/$defs/textList"}}
+      }
+    },
+    "constraints": {"$ref": "#/$defs/textList"},
+    "risks": {
+      "type": "array", "minItems": 1, "items": {
+        "type": "object", "required": ["failure", "fallback"], "additionalProperties": false,
+        "properties": {"failure": {"$ref": "#/$defs/text"}, "fallback": {"$ref": "#/$defs/text"}}
+      }
+    }
+  },
+  "$defs": {
+    "text": {"type": "string", "minLength": 1},
+    "textList": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/text"}},
+    "subject": {
+      "type": "object", "required": ["name", "parts"], "additionalProperties": false,
+      "properties": {
+        "name": {"$ref": "#/$defs/text"},
+        "parts": {
+          "type": "array", "minItems": 1, "items": {
+            "type": "object", "required": ["id", "description"], "additionalProperties": false,
+            "properties": {"id": {"$ref": "#/$defs/text"}, "description": {"$ref": "#/$defs/text"}, "parent": {"$ref": "#/$defs/text"}}
+          }
+        }
+      }
+    }
+  }
+}
