@@ -22,8 +22,19 @@ let direction = 1;
 let animation = 0;
 let playing = false;
 
+const problem = document.querySelector<HTMLElement>("#empty")!;
 function seek(seconds: number) {
-  time = renderAt(context, current, seconds);
+  try {
+    time = renderAt(context, current, seconds);
+    problem.hidden = true;
+  } catch (error) {
+    // One scene failing (e.g. no WebGL 2 float targets) must not take the whole player down.
+    time = Math.max(0, Math.min(current.duration, seconds));
+    problem.hidden = false;
+    problem.textContent = "此场景无法在当前浏览器渲染：" + (error instanceof Error ? error.message : String(error)) +
+      "。请用最新版 Chrome / Edge 打开，或在浏览器设置中开启硬件加速。";
+    if (renderMode) throw error;
+  }
   scrub.value = String(time);
   timer.value = time.toFixed(2) + " / " + current.duration.toFixed(2) + " s";
 }
