@@ -32,6 +32,7 @@ npm run dev
 npm run build
 npm test
 npm run check:visual -- your-scene
+node tools/frames.mjs your-scene 2.5 3 3.5   # specific times side by side
 npm run export -- your-scene --width 1920 --out gallery
 ```
 

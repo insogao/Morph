@@ -1,6 +1,6 @@
 import {
-  makeParticleTracks, particleAt, samplePolygon, seededRandom,
-  type ParticleEndpoint, type ParticleTrack, type Point2,
+  makeParticleTracks, samplePolygon, seededRandom,
+  type ParticleEndpoint, type ParticlePose, type ParticleTrack, type Point2,
 } from "../../packages/morph-engine/src/effects/particles";
 
 const width = 1280;
@@ -428,34 +428,102 @@ function paintFlight(ctx: CanvasRenderingContext2D, time: number, local: boolean
   ctx.restore();
 }
 
+// Organised transit: every grain spirals into a shared orbit around the travelling seed head,
+// rides the orbit for a beat, then unwinds outward along its own spiral to its wing sample.
+// The orbit is the legible middle structure, so the cloud never reads as random spray.
+const orbitRandom = seededRandom(4421);
+const SPIN = 2.4;
+const TAU = Math.PI * 2;
+const wrap = (v: number) => ((v % TAU) + TAU) % TAU;
+const orbits = new Map(tracks.map(track => {
+  const [tx, ty] = track.target.point;
+  const gather = Math.max(track.depart + 0.75, 2.95 + orbitRandom() * 0.35);
+  const release = Math.max(gather + 0.18, 3.5 + track.target.order * 0.55 + orbitRandom() * 0.12);
+  const arrive = release + 0.85;
+  const base = Math.atan2(ty - butterfly[1], tx - butterfly[0]) - 1.1 * Math.PI - SPIN * release;
+  const radius = 78 + orbitRandom() * 46;
+  const tilt = 0.42 + orbitRandom() * 0.08;
+  track.arrive = arrive;
+  return [track, { gather, release, arrive, base, radius, tilt }];
+}));
+
+function nucleus(time: number): Point2 {
+  const gather = ease(2.07, 3.37, time);
+  return [mix(flower[0], butterfly[0], gather), mix(flower[1], butterfly[1] - 26, gather) - 58 * Math.sin(gather * Math.PI)];
+}
+
+function orbitPose(track: ParticleTrack, time: number): ParticlePose {
+  const o = orbits.get(track)!;
+  if (time < track.depart) return { x: track.source.point[0], y: track.source.point[1], progress: 0, state: "source" };
+  if (time >= o.arrive) return { x: track.target.point[0], y: track.target.point[1], progress: 1, state: "target" };
+  const ring = (t: number) => o.base + SPIN * t;
+  const onRing = (t: number, r: number, a: number): Point2 => {
+    const c = nucleus(t);
+    return [c[0] + Math.cos(a) * r, c[1] + Math.sin(a) * r * o.tilt];
+  };
+  const progress = clamp((time - track.depart) / (o.arrive - track.depart));
+  if (time < o.gather) {
+    // Spiral in: polar blend around the moving nucleus, turning with the orbit.
+    const u = ease(track.depart, o.gather, time);
+    const c = nucleus(time);
+    const [sx, sy] = track.source.point;
+    const rs = Math.hypot(sx - c[0], (sy - c[1]) / o.tilt);
+    const as = Math.atan2((sy - c[1]) / o.tilt, sx - c[0]);
+    const end = ring(o.gather);
+    const start = end - (wrap(end - as) + Math.PI * 0.5);
+    const [x, y] = onRing(time, mix(rs, o.radius, u), mix(start, end, u) + SPIN * (time - o.gather) * u);
+    return { x, y, progress, state: "transit" };
+  }
+  if (time < o.release) {
+    const [x, y] = onRing(time, o.radius, ring(time));
+    return { x, y, progress, state: "transit" };
+  }
+  // Unwind: radius and angle move from the orbit to the target in the frame of the final butterfly.
+  const u = ease(o.release, o.arrive, time);
+  const a0 = ring(o.release);
+  const [tx, ty] = track.target.point;
+  const c0 = nucleus(o.release);
+  const at = Math.atan2(ty - butterfly[1], tx - butterfly[0]);
+  const rt = Math.hypot(tx - butterfly[0], ty - butterfly[1]);
+  const a1 = a0 + wrap(at - a0) + (wrap(at - a0) < 1.2 ? TAU : 0);
+  const a = mix(a0, a1, u);
+  const r = mix(o.radius, rt, u * u);
+  const tilt = mix(o.tilt, 1, u);
+  const cx = mix(c0[0], butterfly[0], u), cy = mix(c0[1], butterfly[1], u);
+  return { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * tilt, progress, state: "transit" };
+}
+
 function drawParticles(ctx: CanvasRenderingContext2D, time: number) {
   const arriving: ParticleTrack[] = [];
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
   for (const track of tracks) {
-    const pose = particleAt(track, time);
+    const pose = orbitPose(track, time);
     if (pose.state === "source") continue;
     if (pose.state === "target") {
       arriving.push(track);
       continue;
     }
-    const size = track.size * (1.3 + Math.sin(Math.PI * pose.progress) * 0.77);
+    const glow = Math.sin(Math.PI * pose.progress);
+    const size = track.size * (1.1 + glow * 0.6);
     const color = pigment(track.source.group % 3 === 0 ? gold : coral,
-      track.target.group % 4 === 3 ? coral : turquoise, pose.progress);
+      track.target.group % 4 === 3 ? coral : turquoise, ease(0.25, 0.85, pose.progress));
+    const prev = orbitPose(track, time - 0.03);
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = 0.16;
+    ctx.lineWidth = size * 1.1;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(prev.x, prev.y);
+    ctx.lineTo(pose.x, pose.y);
+    ctx.stroke();
+    ctx.globalAlpha = 0.5;
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(pose.x, pose.y, size, 0, Math.PI * 2);
     ctx.fill();
-    if (track.size > 1.26) {
-      const prev = particleAt(track, time - 0.038);
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 0.75;
-      ctx.globalAlpha = 0.31;
-      ctx.beginPath();
-      ctx.moveTo(prev.x, prev.y);
-      ctx.lineTo(pose.x, pose.y);
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    }
   }
+  ctx.restore();
   if (!arriving.length) return;
 
   // Settled grains open the pattern in a union of growing circular deposits.

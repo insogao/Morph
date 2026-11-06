@@ -1,63 +1,200 @@
-import { mix, ramp, type MorphScene } from "../../packages/morph-engine/src/core/scene";
-import { liquidPath } from "../../packages/morph-engine/src/effects/liquid";
+import type { MorphScene } from "../../packages/morph-engine/src/core/scene";
+import { createSdfRenderer, type Prim, type RGB, type SdfRenderer, type Vec2 } from "../../packages/morph-engine/src/renderers/sdf-gl";
+import { backOut, clamp, hex, lerp, mixRGB, rng, smooth, smoother, strokePrims, taper, transformPrims, win, type Stroke } from "../../packages/morph-engine/src/effects/skeleton";
 
-type Point = [number, number];
+/*
+ * Ink drop → bird, seen from above a sheet of paper.
+ * The splash crown throws satellite droplets exactly where the bird's feather tips will land.
+ * Wet fingers grow out of the puddle and catch them, so the extremities are pre-figured
+ * by the splash and nothing appears from nowhere. Then the bird peels off the paper:
+ * the cast shadow separates and the stain is left behind.
+ */
 
-function random(seed: number) {
-  return () => {
-    seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-    return seed / 4294967296;
-  };
+const DURATION = 7.5;
+const IMPACT = .95;
+const HOME: Vec2 = [560, 380];
+const INK: RGB = hex("#0b1517");
+const INK_SHEEN: RGB = hex("#22363a");
+
+type Feather = { base: Vec2; dir: number; len: number; r0: number; r1: number; delay: number; side: number; wing: boolean };
+
+// Bird in local coordinates, heading up (−y), unit scale.
+function buildBird(): Feather[] {
+  const out: Feather[] = [];
+  for (const side of [-1, 1]) {
+    // Primaries fan from the hand.
+    for (let k = 0; k < 7; k++) {
+      const u = k / 6;
+      out.push({ base: [side * lerp(186, 150, u), lerp(-34, -18, u)], dir: side > 0 ? lerp(-.45, .55, u) : Math.PI - lerp(-.45, .55, u),
+        len: lerp(96, 66, u), r0: 8.5, r1: 2.2, delay: .55 + .35 * (1 - u), side, wing: true });
+    }
+    // Secondaries trail the forearm.
+    for (let k = 0; k < 6; k++) {
+      const u = k / 5;
+      out.push({ base: [side * lerp(140, 46, u), lerp(-18, -10, u)], dir: Math.PI / 2 + side * lerp(.42, .12, u),
+        len: lerp(58, 46, u), r0: 10, r1: 3.6, delay: .35 + .2 * (1 - u), side, wing: true });
+    }
+  }
+  // Swallow-like forked tail.
+  for (let k = 0; k < 5; k++) {
+    const u = k / 4 - .5;
+    out.push({ base: [u * 12, 48], dir: Math.PI / 2 + u * .9, len: 62 + Math.abs(u) * 64, r0: 8, r1: 1.8, delay: .45 + Math.abs(u) * .3, side: 0, wing: false });
+  }
+  return out;
 }
-const rand = random(809);
-const flecks = Array.from({ length: 1800 }, () => ({
-  x: rand() * 1280, y: rand() * 720, size: .2 + rand() * 1.05, light: rand() > .55,
-}));
-const drops = Array.from({ length: 21 }, (_, index) => ({
-  angle: rand() * Math.PI * 2, distance: 21 + rand() * 63,
-  delay: 1.9 + rand() * 1.1, radius: 1 + rand() * 4, side: index % 2 ? 1 : -1,
-}));
+const FEATHERS = buildBird();
+const ARM = (side: number): Vec2[] => [[side * 16, -16], [side * 84, -6], [side * 150, -22], [side * 186, -34]];
 
-function background(ctx: CanvasRenderingContext2D) {
-  const paper = ctx.createLinearGradient(0, 10, 1270, 700);
-  paper.addColorStop(0, "#f9f0d9");
-  paper.addColorStop(.61, "#eee4ce");
-  paper.addColorStop(1, "#dcd4bf");
-  ctx.fillStyle = paper;
+// Satellite drops thrown by the splash, each owned by a feather tip that will catch it.
+const r = rng(11);
+const SATELLITES = FEATHERS.map((f, i) => ({ i, f })).filter(({ f }) => f.wing ? f.len > 64 : f.len > 90)
+  .map(({ i, f }) => {
+    const tip: Vec2 = [f.base[0] + Math.cos(f.dir) * f.len, f.base[1] + Math.sin(f.dir) * f.len];
+    const k = lerp(.7, .95, r());
+    return { feather: i, land: [tip[0] * k + (r() - .5) * 16, tip[1] * k + (r() - .5) * 16] as Vec2, size: 4 + r() * 4.5, delay: r() * .14 };
+  });
+// Fine mist that never becomes bird: it soaks into the paper and stays as speckle.
+const MIST = Array.from({ length: 34 }, () => {
+  const a = r() * Math.PI * 2, d = 80 + Math.pow(r(), .6) * 170;
+  return { land: [Math.cos(a) * d, Math.sin(a) * d * .9] as Vec2, size: 1.4 + r() * 3.2, delay: r() * .18 };
+});
+
+function flapPose(t: number) {
+  const active = win(t, 4.05, 4.5);
+  const phase = (t - 4.05) * Math.PI * 2 * 1.9;
+  return { span: 1 - active * (.42 - .42 * Math.cos(phase)) * .9, sweep: active * Math.sin(phase) * .16 };
+}
+
+/** Where the whole bird sits: on the paper, then lifting toward the viewer and away. */
+function flight(t: number) {
+  const lift = smoother((t - 3.95) / 3.2);
+  const p: Vec2 = [lerp(HOME[0], 980, lift), lerp(HOME[1], 168, Math.pow(lift, .85))];
+  return { lift, pos: p, angle: lerp(-.18, .62, smooth((t - 4.1) / 2.6)), scale: lerp(1, 1.32, lift) + .015 * Math.sin(t * 9) * lift };
+}
+
+function birdPrims(t: number): Prim[] {
+  const form = (d: number) => smoother((t - 1.3 - d * 1.45) / 1.15);
+  const crisp = win(t, 2.6, 3.9);
+  const { span, sweep } = flapPose(t);
+  const wet = 1 - .55 * win(t, 3.4, 5);
+  const ink = { color: INK, gloss: lerp(.95, .55, 1 - wet), sss: 0, wobble: lerp(2.6, .3, crisp) * (t < IMPACT ? 0 : 1), anchor: [0, 0] as Vec2 };
+  const P = (p: Vec2, side: number): Vec2 => side ? [p[0] * span, p[1] + Math.abs(p[0]) * sweep] : p;
+  const prims: Prim[] = [];
+
+  // Puddle: the reservoir. It gives volume to the wings and shrinks into the body.
+  const splash = backOut(smooth((t - IMPACT) / .45), 2.2);
+  const drain = smoother((t - 1.45) / 1.9);
+  if (t >= IMPACT) {
+    const ring = .08 * Math.sin((t - IMPACT) * 18) * Math.exp(-(t - IMPACT) * 4);
+    const rr = 64 * splash * (1 + ring);
+    const stretch = win(t, 1.15, 1.7) * (1 - drain);
+    prims.push({ ...ink, shape: { kind: "ellipse", x: 0, y: 10 * drain, rx: lerp(rr * (1 + .35 * stretch), 22, drain), ry: lerp(rr * .94 * (1 - .18 * stretch), 58, drain) } });
+  } else {
+    // Falling drop seen from above: small and round until contact.
+    const s = lerp(.55, 1, smooth(t / IMPACT));
+    prims.push({ ...ink, gloss: 1, shape: { kind: "ellipse", x: 0, y: 0, rx: 30 * s, ry: 30 * s } });
+    return prims;
+  }
+
+  // Body + head + beak.
+  const bodyGrow = form(.05);
+  prims.push({ ...ink, blend: 22, shape: { kind: "ellipse", x: 0, y: 0, rx: lerp(30, 22, bodyGrow), ry: lerp(30, 56, bodyGrow) } });
+  const head = form(.18);
+  prims.push({ ...ink, blend: lerp(30, 12, crisp), shape: { kind: "ellipse", x: 0, y: lerp(-10, -68, head), rx: lerp(12, 18, head), ry: lerp(12, 19, head) } });
+  const beak = form(.42);
+  prims.push({ ...ink, blend: 5, shape: { kind: "capsule", ax: 0, ay: lerp(-30, -82, head), bx: 0, by: lerp(-30, -106, beak), ra: 6.5, rb: lerp(5, 1.4, beak) } });
+
+  // Wing arms: shoulder → elbow → wrist → hand, grown outward from the puddle.
+  for (const side of [-1, 1]) {
+    const arm = ARM(side);
+    const pts: Vec2[] = arm.map((p, k) => {
+      const g = form(.15 + k * .1);
+      return P([p[0] * lerp(.15, 1, g), p[1] * g], side);
+    });
+    prims.push(...strokePrims({ points: pts, radii: [17, 14, 10, 7] }, { ...ink, rootBlend: lerp(30, 14, crisp), jointBlend: 6 }));
+  }
+
+  // Feathers: each grows from the puddle edge outward ("viscous fingering") and catches its droplet.
+  FEATHERS.forEach(f => {
+    const g = form(f.delay);
+    if (g <= 0) return;
+    const base = P([f.base[0] * lerp(.25, 1, g), f.base[1] * lerp(.25, 1, g)], f.side);
+    const tipFull: Vec2 = [f.base[0] + Math.cos(f.dir) * f.len, f.base[1] + Math.sin(f.dir) * f.len];
+    const tip = P([lerp(base[0] / (f.side ? span : 1), tipFull[0], g), lerp(base[1], tipFull[1], g)], f.side);
+    const n = 6;
+    const pts: Vec2[] = Array.from({ length: n }, (_, k) => {
+      const u = k / (n - 1);
+      const bend = Math.sin(u * Math.PI) * (f.side ? -6 : 0) * g;
+      return [lerp(base[0], tip[0], u), lerp(base[1], tip[1], u) + bend];
+    });
+    const radii = taper(n, f.r0 * lerp(1.6, 1, g), f.r1 * lerp(2.2, 1, crisp), 1.1);
+    const stroke: Stroke = { points: pts, radii };
+    prims.push(...strokePrims(stroke, { ...ink, rootBlend: lerp(26, 6, crisp), jointBlend: lerp(5, 1, crisp) }));
+  });
+
+  // Satellite droplets: thrown out at impact, they wait on the paper until the matching feather reaches them.
+  for (const sat of SATELLITES) {
+    const f = FEATHERS[sat.feather];
+    const fly = smooth((t - IMPACT - sat.delay) / .32);
+    const reach = form(f.delay);
+    if (fly <= 0 || reach >= .98) continue;
+    const land = P(sat.land, f.side);
+    const tipNow: Vec2 = (() => {
+      const base: Vec2 = [f.base[0] * lerp(.25, 1, reach), f.base[1] * lerp(.25, 1, reach)];
+      return P([lerp(base[0], f.base[0] + Math.cos(f.dir) * f.len, reach), lerp(base[1], f.base[1] + Math.sin(f.dir) * f.len, reach)], f.side);
+    })();
+    const pull = smooth((reach - .6) / .38);
+    const p: Vec2 = [lerp(land[0] * fly, tipNow[0], pull), lerp(land[1] * fly, tipNow[1], pull)];
+    const s = sat.size * (1 - pull * .9) * (fly < 1 ? lerp(1.4, 1, fly) : 1);
+    prims.push({ ...ink, blend: 9, shape: { kind: "ellipse", x: p[0], y: p[1], rx: s, ry: s * (fly < 1 ? .7 : 1) } });
+  }
+
+  for (const m of MIST) {
+    const fly = smooth((t - IMPACT - m.delay) / .3);
+    const soak = win(t, 1.6, 2.8);
+    const size = m.size * (1 - soak) * (fly < 1 ? lerp(1.3, 1, fly) : 1);
+    if (fly <= 0 || size < .3) continue;
+    prims.push({ ...ink, wobble: 0, blend: 2, shape: { kind: "ellipse", x: m.land[0] * fly, y: m.land[1] * fly, rx: size, ry: size } });
+  }
+
+  // Decals: wet highlight band along the wing coverts, an eye.
+  const eye = win(t, 3.4, 3.8);
+  if (eye > 0) prims.push({ decal: true, opacity: eye, bump: 1.5, color: hex("#d9c9a7"), gloss: 1, shape: { kind: "ellipse", x: 7, y: -72, rx: 3.2, ry: 3.2 } });
+  for (const side of [-1, 1]) {
+    const cover = win(t, 3.1, 3.9) * .55;
+    if (cover > 0) prims.push({ decal: true, opacity: cover, bump: 1, color: INK_SHEEN, gloss: .6,
+      shape: { kind: "capsule", ax: side * 20 * span, ay: -12, bx: side * 140 * span, by: -16 + 140 * Math.abs(sweep), ra: 9, rb: 5 } });
+  }
+  return prims;
+}
+
+// ---------- paper ----------
+const rand = rng(809);
+const flecks = Array.from({ length: 1800 }, () => ({ x: rand() * 1280, y: rand() * 720, size: .2 + rand() * 1.05, light: rand() > .55 }));
+
+function paper(ctx: CanvasRenderingContext2D) {
+  const g = ctx.createLinearGradient(0, 10, 1270, 700);
+  g.addColorStop(0, "#f9f0d9");
+  g.addColorStop(.61, "#eee4ce");
+  g.addColorStop(1, "#dcd4bf");
+  ctx.fillStyle = g;
   ctx.fillRect(0, 0, 1280, 720);
   for (const { x, y, size, light } of flecks) {
     ctx.fillStyle = light ? "#fff8e83a" : "#6b564214";
     ctx.fillRect(x, y, size, size);
   }
-
-  const glow = ctx.createRadialGradient(792, 289, 12, 792, 289, 257);
-  glow.addColorStop(0, "#c1715433");
+  const glow = ctx.createRadialGradient(990, 170, 12, 990, 170, 260);
+  glow.addColorStop(0, "#c1715440");
   glow.addColorStop(.7, "#d4996520");
   glow.addColorStop(1, "#d4996500");
   ctx.fillStyle = glow;
-  ctx.fillRect(520, 15, 545, 545);
+  ctx.fillRect(700, 0, 580, 460);
   ctx.strokeStyle = "#ad6c5444";
   ctx.lineWidth = 1;
   ctx.beginPath();
-  ctx.arc(792, 289, 175, 0, 2 * Math.PI);
+  ctx.arc(990, 170, 150, 0, 2 * Math.PI);
   ctx.stroke();
-
-  for (let layer = 0; layer < 4; layer++) {
-    const y = 565 + layer * 26;
-    ctx.fillStyle = ["#71857c22", "#63786e22", "#51635a25", "#44594e28"][layer];
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.bezierCurveTo(124, y - 20, 139, y - 104 + layer * 12, 289, y - 70);
-    ctx.bezierCurveTo(434, y - 58, 455, y - 34, 591, y - 36);
-    ctx.bezierCurveTo(700, y - 39, 742, y - 81 + layer * 8, 850, y - 53);
-    ctx.bezierCurveTo(1012, y + 12, 1100, y - 82 + layer * 9, 1280, y - 65);
-    ctx.lineTo(1280, 720);
-    ctx.lineTo(0, 720);
-    ctx.fill();
-  }
-
   ctx.strokeStyle = "#655d4d60";
-  ctx.lineWidth = 1;
   ctx.strokeRect(28.5, 28.5, 1223, 663);
   ctx.fillStyle = "#62574b";
   ctx.font = "12px Georgia, serif";
@@ -67,128 +204,63 @@ function background(ctx: CanvasRenderingContext2D) {
   ctx.textAlign = "left";
 }
 
-function shape(ctx: CanvasRenderingContext2D, points: Point[]) {
+/** The ink the bird leaves behind, absorbed into the paper fibres: a feathered pool with a darker drying ring. */
+function stain(ctx: CanvasRenderingContext2D, t: number) {
+  const a = win(t, 1.3, 2.4) * (1 - .3 * win(t, 4.5, 7.5));
+  if (a <= 0) return;
+  const grow = win(t, 1.0, 2.0);
+  ctx.save();
+  ctx.translate(...HOME);
+  ctx.globalAlpha = a;
+  ctx.filter = "blur(5px)";
+  ctx.fillStyle = "#33413f1e";
   ctx.beginPath();
-  ctx.moveTo(...points[0]);
-  for (let index = 1; index < points.length; index++) ctx.lineTo(...points[index]);
-  ctx.closePath();
+  ctx.ellipse(0, 6, 78 * grow, 70 * grow, 0, 0, Math.PI * 2);
   ctx.fill();
-}
-
-function wing(ctx: CanvasRenderingContext2D, side: -1 | 1, growth: number, beat: number, detail: number) {
-  if (growth <= 0) return;
-  const span = (side < 0 ? 264 : 213) * growth;
-  const lift = (side < 0 ? -91 : -140) + beat * 69;
-  const rootX = side * 6;
-  const point = (x: number, y: number): Point => [rootX + side * x * span, y * growth + x * x * lift * growth];
-  const edge = new Path2D();
-  edge.moveTo(...point(0, 10));
-  edge.bezierCurveTo(...point(.18, -50), ...point(.46, -113), ...point(.95, -57));
-  edge.quadraticCurveTo(...point(1.05, -45), ...point(1, -38));
-  const feathers: Point[] = [];
-  for (let index = 0; index < 9; index++) {
-    const t = index / 8;
-    const x = 1 - t * .76;
-    const splay = (8 + 24 * (1 - t) ** 1.3 + 4 * Math.sin(Math.PI * t)) * detail;
-    edge.quadraticCurveTo(...point(x + .006, -23 + t * 60), ...point(x + .035 * detail, -12 + t * 66 + splay));
-    edge.quadraticCurveTo(...point(x - .027, -15 + t * 63 + splay * .79), ...point(x - .076, -18 + t * 63));
-    feathers.push(point(x - .012, -11 + t * 65 + splay * .73));
+  ctx.filter = "blur(1.5px)";
+  ctx.strokeStyle = "#2a36343a";
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  for (let k = 0; k <= 64; k++) {
+    const ang = k / 64 * Math.PI * 2;
+    const rr = 74 * grow * (1 + .05 * Math.sin(ang * 5 + 1) + .03 * Math.sin(ang * 11));
+    const x = Math.cos(ang) * rr, y = 6 + Math.sin(ang) * rr * .93;
+    if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y);
   }
-  edge.quadraticCurveTo(...point(.12, 41), ...point(0, 16));
-  edge.closePath();
-  ctx.fill(edge);
-  if (detail <= 0) return;
-  ctx.save();
-  ctx.clip(edge);
-  ctx.lineCap = "round";
-  for (let index = 0; index < feathers.length; index++) {
-    const [x, y] = feathers[index];
-    const [sx, sy] = point(.16 + (.69 * (1 - index / 8)), -41 + index * 4.5);
-    ctx.strokeStyle = "#b9c8b3" + (side < 0 ? "24" : "1b");
-    ctx.lineWidth = index % 3 === 0 ? 2.1 : 1.3;
+  ctx.stroke();
+  ctx.filter = "none";
+  const speck = win(t, 1.8, 2.8);
+  ctx.fillStyle = "#26302f";
+  for (const m of MIST) {
+    ctx.globalAlpha = a * speck * .55;
     ctx.beginPath();
-    ctx.moveTo(sx, sy);
-    ctx.quadraticCurveTo(mix(sx, x, .7), mix(sy, y, .28), mix(sx, x, detail), mix(sy, y, detail));
-    ctx.stroke();
+    ctx.arc(m.land[0], m.land[1], m.size * .8, 0, Math.PI * 2);
+    ctx.fill();
   }
   ctx.restore();
 }
 
-function draw(ctx: CanvasRenderingContext2D, time: number) {
-  background(ctx);
-  const fall = ramp(time, .55, 1.5);
-  const open = ramp(time, 1.58, 4.04);
-  const flight = ramp(time, 4.32, 6.85);
-  const formation = ramp(time, 2.44, 4.38);
-  const flap = Math.sin((time - 4.12) * Math.PI * 2 * 1.02) * ramp(time, 4.05, 4.74);
-  ctx.save();
-  ctx.translate(546 + flight * 295, 224 + fall * 158 - flight * 96 + flap * 10 + Math.sin(time * 3.1) * (1 - fall) * 3);
-  ctx.rotate((-.23 * formation - .13 * flight) + flap * .055);
-  const scale = 1 - flight * .22;
-  ctx.scale(scale, scale);
+let renderer: SdfRenderer | null = null;
 
-  const ink = ctx.createLinearGradient(-90, -180, 44, 135);
-  ink.addColorStop(0, "#4a5c52");
-  ink.addColorStop(.44, "#253a35");
-  ink.addColorStop(1, "#111f1c");
-  ctx.fillStyle = ink;
-  for (const drop of drops) {
-    const p = ramp(time, drop.delay, drop.delay + 1.1);
-    if (p <= 0) continue;
-    const x = Math.cos(drop.angle) * drop.distance * p + drop.side * open * 98 - flight * 130;
-    const y = Math.sin(drop.angle) * drop.distance * p + 30 + 37 * p + flight * 70;
-    ctx.fillStyle = "rgba(34,53,44," + (1 - p * .42) * .67 + ")";
-    ctx.beginPath();
-    ctx.ellipse(x, y, drop.radius * (1 + .5 * p), Math.max(.45, drop.radius * (1 - .61 * p)), drop.angle, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.fillStyle = ink;
-
-  const massHeight = mix(65 + fall * 23, 49, formation);
-  const massWidth = mix(58 - fall * 12, 74, formation);
-  if (formation < 1) {
-    const fork = ramp(time, 1.33, 2.7);
-    const elongation = ramp(time, .75, 1.86);
-    const liquid = liquidPath([
-      { x: 0, y: 0, radiusX: massWidth, radiusY: massHeight, strength: mix(1.14, .36, formation) },
-      { x: -9, y: -41 * elongation, radiusX: 28, radiusY: 45, strength: .76 * (1 - formation) },
-      { x: -fork * 79, y: -fork * 27, radiusX: 42, radiusY: 28, strength: .9 * (1 - formation) * fork },
-      { x: -fork * 38, y: -fork * 18, radiusX: 39, radiusY: 34, strength: .95 * (1 - formation) * fork },
-      { x: fork * 61, y: -fork * 46, radiusX: 37, radiusY: 38, strength: .9 * (1 - formation) * fork },
-      { x: fork * 31, y: -fork * 25, radiusX: 36, radiusY: 34, strength: .96 * (1 - formation) * fork },
-    ], { cellSize: 2, iso: .33 });
-    ctx.fill(liquid, "evenodd");
-  }
-
-  wing(ctx, 1, Math.pow(open, .88), flap, formation);
-  wing(ctx, -1, open, -flap * .68, formation);
-  const bodyScale = ramp(time, 2.14, 3.36);
-  if (bodyScale > 0) {
-    ctx.save();
-    ctx.scale(bodyScale, bodyScale);
-    ctx.fillStyle = ink;
-    ctx.beginPath();
-    ctx.moveTo(-62, 48);
-    ctx.bezierCurveTo(-53, 21, -31, -6, 2, -16);
-    ctx.bezierCurveTo(25, -21, 52, 1, 65, -1);
-    ctx.bezierCurveTo(78, -3, 90, 4, 88, 14);
-    ctx.bezierCurveTo(83, 23, 66, 23, 58, 24);
-    ctx.bezierCurveTo(28, 53, -22, 57, -62, 48);
-    ctx.closePath();
-    ctx.fill();
-    const tail = ramp(time, 2.73, 3.88);
-    shape(ctx, [[-43, 30], [-43-60*tail, 60+3*flap], [-51-25*tail, 54], [-53-51*tail, 83], [-23, 45]]);
-    const bill = ramp(time, 3.15, 3.85);
-    shape(ctx, [[82,7],[86+26*bill,9-6*bill],[86,17]]);
-    if (formation > .7) {
-      ctx.fillStyle = "#d9c3a2";
-      ctx.beginPath();
-      ctx.arc(80, 6, 2.4 * ramp(formation, .7, 1), 0, 2 * Math.PI);
-      ctx.fill();
-    }
-    ctx.restore();
-  }
-  ctx.restore();
-}
-
-export const scene: MorphScene = { id: "ink-bird", title: "墨滴 → 飞鸟", duration: 7, draw };
+export const scene: MorphScene = {
+  id: "ink-bird",
+  title: "墨滴 → 飞鸟",
+  duration: DURATION,
+  draw(ctx, t) {
+    renderer ??= createSdfRenderer();
+    paper(ctx);
+    stain(ctx, t);
+    const { lift, pos, angle, scale } = flight(t);
+    // Before impact the drop is above the paper: its shadow leads it in.
+    const air = t < IMPACT ? 1 - smooth(t / IMPACT) : lift;
+    const shadowOffset: Vec2 = t < IMPACT ? [70 * air, 95 * air] : [lerp(3, 120, lift), lerp(4, 150, lift)];
+    const prims = transformPrims(birdPrims(t), angle, [0, 0], pos, scale);
+    renderer.draw(ctx, prims, {
+      thickness: lerp(9, 14, win(t, 3, 4.5)), time: t, seed: 7,
+      light: [-.5, -.65, .58], keyColor: [1, .97, .9], ambientTop: [.6, .62, .62], ambientBottom: [.25, .24, .22],
+      rimColor: [.95, .9, .8],
+      shadowOffset, shadowSoftness: lerp(3, 26, Math.max(air, lift)), shadowOpacity: lerp(.42, .16, Math.max(air, lift)),
+      shadowColor: [.24, .2, .14],
+    });
+  },
+};

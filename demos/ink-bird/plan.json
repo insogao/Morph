@@ -1,46 +1,166 @@
 {
   "id": "ink-bird",
-  "title": "纸上起飞",
-  "duration": 7,
+  "title": "墨滴 → 飞鸟",
+  "duration": 7.5,
   "source": {
     "name": "墨滴",
     "parts": [
-      { "id": "reservoir", "description": "圆形墨滴，主要体积" },
-      { "id": "trail", "description": "拉伸的液体尾迹", "parent": "reservoir" },
-      { "id": "lobes", "description": "双侧分叉的湿墨", "parent": "reservoir" }
+      {
+        "id": "drop",
+        "description": "下落的墨滴，阴影先于墨滴到达纸面"
+      },
+      {
+        "id": "puddle",
+        "description": "撞击后摊开的墨池，主要体积",
+        "parent": "drop"
+      },
+      {
+        "id": "satellites",
+        "description": "撞击溅出的卫星墨点",
+        "parent": "drop"
+      },
+      {
+        "id": "mist",
+        "description": "细小飞沫，会渗进纸里",
+        "parent": "drop"
+      }
     ]
   },
   "target": {
     "name": "飞鸟",
     "parts": [
-      { "id": "body", "description": "细长鸟身及喙" },
-      { "id": "tail", "description": "分叉的尾羽", "parent": "body" },
-      { "id": "left", "description": "近侧展翼", "parent": "body" },
-      { "id": "right", "description": "远侧展翼", "parent": "body" }
+      {
+        "id": "body",
+        "description": "鸟身、头和喙"
+      },
+      {
+        "id": "wings",
+        "description": "两翼：臂骨链 + 初级/次级飞羽",
+        "parent": "body"
+      },
+      {
+        "id": "tail",
+        "description": "燕尾形分叉尾羽",
+        "parent": "body"
+      },
+      {
+        "id": "stain",
+        "description": "留在纸上的墨渍"
+      }
     ]
   },
   "candidates": [
-    { "name": "湿墨分叉", "approach": "墨滴下坠后横向分叉，再长出初级飞羽", "tradeoff": "翼根和墨池必须重叠，才能自然换到结构化轮廓" },
-    { "name": "结构折纸", "approach": "墨滴压成平面，再折出两翼", "tradeoff": "角度清楚，但湿墨变成纸的动机较弱" },
-    { "name": "粒子成鸟", "approach": "墨滴甩出两股粒子并汇聚到翼尖", "tradeoff": "粒子华丽，主体容易在中途变得不清楚" }
+    {
+      "name": "溅射预示",
+      "approach": "墨滴砸在纸上，溅出的卫星墨点正好落在未来羽尖的位置；墨池长出指状湿墨去接住它们，最终成鸟并离开纸面",
+      "tradeoff": "末端结构被溅射提前暗示，惊喜和连续性兼顾；需要逐羽骨架与墨点配对"
+    },
+    {
+      "name": "结构折纸",
+      "approach": "墨滴压成平面，再折出两翼",
+      "tradeoff": "角度清楚，但湿墨变成纸的动机较弱"
+    },
+    {
+      "name": "粒子成鸟",
+      "approach": "墨滴甩出两股粒子并汇聚到翼尖",
+      "tradeoff": "粒子华丽，主体容易在中途变得不清楚"
+    }
   ],
-  "selected": "湿墨分叉",
+  "selected": "溅射预示",
   "mappings": [
-    { "from": ["reservoir"], "to": ["body"], "carry": "深绿黑墨的中心和主体质量" },
-    { "from": ["trail"], "to": ["tail"], "carry": "拖拽方向和分叉轮廓" },
-    { "from": ["lobes"], "to": ["left", "right"], "carry": "两侧湿墨通过各自翼根继续拉伸" }
+    {
+      "from": [
+        "drop",
+        "puddle"
+      ],
+      "to": [
+        "body"
+      ],
+      "carry": "同一质心；墨池体积逐渐流入身体和翼根"
+    },
+    {
+      "from": [
+        "puddle",
+        "satellites"
+      ],
+      "to": [
+        "wings",
+        "tail"
+      ],
+      "carry": "每根羽毛从墨池边缘指状生长，接住属于它的卫星墨点"
+    },
+    {
+      "from": [
+        "mist",
+        "puddle"
+      ],
+      "to": [
+        "stain"
+      ],
+      "carry": "飞沫和墨池残留渗进纸纤维，鸟起飞后仍留在原地"
+    }
   ],
   "beats": [
-    { "at": 0, "event": "纸上悬着一滴墨", "effects": ["implicit-field"] },
-    { "at": 1.5, "event": "墨滴坠下并拉出尾迹", "effects": ["implicit-field"] },
-    { "at": 2.5, "event": "左右墨瓣在同一墨池分叉，翼根开始外展", "effects": ["implicit-field", "semantic-part"] },
-    { "at": 4.05, "event": "边缘伸出飞羽，鸟头和尾羽形成", "effects": ["semantic-part", "contour"] },
-    { "at": 5.2, "event": "鸟振翅越过日轮，带起零星墨点", "effects": ["rig", "secondary-particles"] },
-    { "at": 7, "event": "飞鸟保持清楚轮廓", "effects": ["rig"] }
+    {
+      "at": 0,
+      "event": "墨滴从上方落下，阴影随之收拢",
+      "effects": [
+        "sdf-part-field",
+        "cast-shadow"
+      ]
+    },
+    {
+      "at": 0.95,
+      "event": "撞击：墨池回弹摊开，溅出卫星墨点和飞沫",
+      "effects": [
+        "liquid-bridge",
+        "smooth-union"
+      ]
+    },
+    {
+      "at": 1.4,
+      "event": "墨池横向拉伸，指状湿墨开始伸出",
+      "effects": [
+        "skeleton-growth"
+      ]
+    },
+    {
+      "at": 2.6,
+      "event": "羽尖接住墨点，羽毛边缘逐渐变清晰",
+      "effects": [
+        "liquid-merge",
+        "blend-radius-ramp"
+      ]
+    },
+    {
+      "at": 4.0,
+      "event": "鸟离开纸面：阴影分离、变软，开始振翅",
+      "effects": [
+        "rig",
+        "cast-shadow"
+      ]
+    },
+    {
+      "at": 7.5,
+      "event": "飞鸟飞向日轮，纸上只剩墨渍",
+      "effects": [
+        "rig"
+      ]
+    }
   ],
-  "constraints": ["墨与鸟共用一个质心和同一墨色范围", "翼根自湿墨开始始终有连接", "尾声至少保留一次完整振翅"],
+  "constraints": [
+    "任何时刻墨都是同一个连通的湿墨场或可追踪的墨点",
+    "羽尖到达位置由溅射预先占据",
+    "起飞通过阴影偏移表达高度，而不是缩放淡出"
+  ],
   "risks": [
-    { "failure": "头和翼根重叠，结尾读成蝙蝠", "fallback": "让喙伸出前缘，并用羽片和分叉尾部加强鸟的结构" },
-    { "failure": "墨池在轮廓接替时收缩成孤岛", "fallback": "前移主体生长时间并扩展中段场的重叠范围" }
+    {
+      "failure": "翼和墨池同时满尺寸，读成黑色团块",
+      "fallback": "墨池随羽毛生长同步收缩"
+    },
+    {
+      "failure": "卫星墨点聚成整齐的行列，显得人工",
+      "fallback": "落点加随机缩放和抖动，并加入不属于任何羽毛的细飞沫"
+    }
   ]
 }

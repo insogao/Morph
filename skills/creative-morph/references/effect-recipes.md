@@ -1,5 +1,7 @@
 # Effect recipes
 
+For organic bodies, limbs and liquid, start with [the SDF part field](sdf-field.md). The recipes below cover the other representations.
+
 ## Track a part
 
 Choose a seam, branch, or pigment deposit and trace it through the handoff. `core/parts.ts` compiles named geometry and material callbacks with parent-first world transforms. Store leaf geometry in local coordinates and attach follow-through to the part that carries it.

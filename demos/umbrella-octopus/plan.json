@@ -1,0 +1,63 @@
+{
+  "id": "umbrella-octopus",
+  "title": "雨伞 → 章鱼",
+  "duration": 8,
+  "source": {
+    "name": "雨伞",
+    "parts": [
+      { "id": "canopy", "description": "八片伞面拼成的穹顶，红色织物，有缝线" },
+      { "id": "rim", "description": "伞面下缘，略带透视的椭圆圈，扇形波边", "parent": "canopy" },
+      { "id": "ribs", "description": "八根伞骨，末端露出伞面边缘", "parent": "canopy" },
+      { "id": "ferrule", "description": "伞顶金属尖", "parent": "canopy" },
+      { "id": "shaft", "description": "木质伞杆", "parent": "canopy" },
+      { "id": "handle", "description": "J 形伞柄弯钩", "parent": "shaft" }
+    ]
+  },
+  "target": {
+    "name": "章鱼",
+    "parts": [
+      { "id": "mantle", "description": "后倾的外套膜，带斑驳肤色" },
+      { "id": "head", "description": "头部，承载双眼和触手根部的环", "parent": "mantle" },
+      { "id": "eyes", "description": "两只横瞳眼睛", "parent": "head" },
+      { "id": "outer-arms", "description": "六根外侧/后侧触手，末端卷曲", "parent": "head" },
+      { "id": "front-arms", "description": "前排中间两根触手，吸盘最显眼", "parent": "head" },
+      { "id": "suckers", "description": "沿触手内侧依次出现的吸盘", "parent": "outer-arms" }
+    ]
+  },
+  "candidates": [
+    { "name": "浸水复苏", "approach": "水面上升淹没雨伞；伞面下垂、伞骨滴水并长成触手，伞杆从弯钩向上拉链式裂开成两根前臂，伞尖熔成两只眼睛，最后喷水游走", "tradeoff": "部件对应最清楚，叙事动机来自水；需要 SDF 骨架处理分裂和融合" },
+    { "name": "收伞成墨", "approach": "雨伞收拢成细长卷，旋转时喷出墨云，墨云散开后露出章鱼", "tradeoff": "惊喜强，但墨云会遮挡关键转化，部件追踪最弱" },
+    { "name": "伞面翻转", "approach": "风把伞面吹翻，翻起的伞骨像触手一样扭动，伞面翻进成外套膜", "tradeoff": "动作有力，但翻转时伞面与外套膜内外颠倒，中间帧容易出现几何翻转" }
+  ],
+  "selected": "浸水复苏",
+  "mappings": [
+    { "from": ["canopy"], "to": ["mantle"], "carry": "红色体量与穹顶高光；裁切平面滑开后椭球变高、后倾" },
+    { "from": ["rim"], "to": ["head"], "carry": "下缘透视椭圆收窄为头部和触手根部环" },
+    { "from": ["ribs"], "to": ["outer-arms", "suckers"], "carry": "伞骨 i 的端点就是触手 i 的根；先下垂滴水，再伸长卷曲，最终接住自己滴下的水珠" },
+    { "from": ["shaft", "handle"], "to": ["front-arms"], "carry": "一分为二：两股重合的骨架从弯钩处向上分离，弯钩的曲率交给左前臂的卷尖" },
+    { "from": ["ferrule"], "to": ["eyes"], "carry": "金属尖熔成银色珠子，沿穹顶前侧滑下并分成两颗，到达头部后睁开" }
+  ],
+  "beats": [
+    { "at": 0, "event": "雨中一把红伞，轻微摆动", "effects": ["sdf-part-field"] },
+    { "at": 1.5, "event": "水面上升淹没伞面；伞面下垂，扇形波边加深，伞骨下弯", "effects": ["sdf-part-field", "liquid-wobble"] },
+    { "at": 2.2, "event": "伞尖熔成珠子滑下；外侧伞骨滴下水珠", "effects": ["decal-transport", "liquid-bridge"] },
+    { "at": 2.7, "event": "伞杆从弯钩开始拉链式裂开；伞骨伸长成触手；穹顶拔高", "effects": ["skeleton-blend", "smooth-union"] },
+    { "at": 3.75, "event": "触手尖端接住先前滴落的水珠；珠子到达头部睁眼", "effects": ["liquid-merge", "decal"] },
+    { "at": 4.3, "event": "吸盘从根到尖依次浮现，肤色斑纹显现", "effects": ["decal", "procedural-material"] },
+    { "at": 5.25, "event": "第一次喷射：外套膜收缩，触手并拢后张开，向右上游动", "effects": ["rig"] },
+    { "at": 6.45, "event": "眨眼，第二次喷射", "effects": ["rig"] },
+    { "at": 8, "event": "章鱼滑行，轮廓完整", "effects": ["rig"] }
+  ],
+  "constraints": [
+    "首帧是可读的雨伞，末帧是可读的章鱼",
+    "伞骨 i 与触手 i 共享同一根骨架点序列，任何时刻都可追踪",
+    "两股伞杆在分离前完全重合，分离由底部向上推进",
+    "眼睛由伞尖物质移动而来，不凭空出现",
+    "颜色从织物红连续过渡到章鱼珊瑚色，不做整体淡入淡出"
+  ],
+  "risks": [
+    { "failure": "形变中段穹顶噪声过大，读成脑子或岩石", "fallback": "降低 wobble 频率与幅度，并在 3.7 秒后快速衰减" },
+    { "failure": "伞杆和两根前臂同时存在，看起来有十根触手", "fallback": "对应位置的两根伞骨在分裂前收回，由伞杆两股接替" },
+    { "failure": "游动时章鱼出画", "fallback": "限制纵向位移并以头部为旋转中心" }
+  ]
+}
