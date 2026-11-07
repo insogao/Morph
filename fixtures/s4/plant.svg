@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Blind-test material B1: potted plant, original artwork (CC0). -->
+  <path id="stem" fill="#2d6a4f" d="M196,236 C194,190 198,150 202,104 L210,104 C206,150 204,190 206,236 Z"/>
+  <path id="leaf_l" fill="#52b788" d="M198,186 C170,140 120,138 96,160 C126,186 168,196 198,186 Z"/>
+  <path id="leaf_c" fill="#40916c" d="M206,112 C178,80 190,40 206,24 C222,40 234,80 206,112 Z"/>
+  <path id="leaf_r" fill="#52b788" d="M208,160 C236,112 286,110 310,132 C280,158 238,168 208,160 Z"/>
+  <path id="pot" fill="#e07a5f" d="M128,236 L272,236 L256,330 L144,330 Z"/>
+  <rect id="rim" fill="#c8553d" x="118" y="226" width="164" height="24" rx="4"/>
+  <ellipse id="soil" fill="#5e4632" cx="200" cy="230" rx="70" ry="7"/>
+  <ellipse id="tray" fill="#9a8c98" cx="200" cy="336" rx="96" ry="10"/>
+</svg>

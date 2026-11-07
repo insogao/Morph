@@ -151,6 +151,8 @@ export function transformPrims(prims: readonly Prim[], angle: number, pivot: Vec
     } else if (sh.kind === "capsule") {
       const [ax, ay] = P(sh.ax, sh.ay), [bx, by] = P(sh.bx, sh.by);
       shape = { kind: "capsule", ax, ay, bx, by, ra: sh.ra * scale, rb: sh.rb * scale };
+    } else if (sh.kind === "polygon") {
+      shape = { kind: "polygon", points: sh.points.map(([x, y]) => P(x, y)) };
     } else {
       const len = Math.hypot(sh.nx, sh.ny) || 1;
       const nx = sh.nx / len, ny = sh.ny / len;

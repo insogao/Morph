@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- G1 light bulb, original artwork for Morph Master generalisation tests (CC0). -->
+  <path id="ray_l" fill="#ffb627" d="M92,92 L108,80 L140,118 L128,128 Z"/>
+  <path id="ray_c" fill="#ffb627" d="M192,30 L208,30 L206,78 L194,78 Z"/>
+  <path id="ray_r" fill="#ffb627" d="M308,92 L292,80 L260,118 L272,128 Z"/>
+  <path id="glass" fill="#ffe08a" d="M200,96 C262,96 302,142 302,198 C302,236 280,258 262,278 C250,292 246,304 246,316 L154,316 C154,304 150,292 138,278 C120,258 98,236 98,198 C98,142 138,96 200,96 Z"/>
+  <path id="filament" fill="#f08a24" d="M176,300 L176,230 L186,208 L196,232 L204,208 L214,232 L224,208 L224,300 L216,300 L216,240 L214,246 L204,224 L196,246 L186,224 L184,240 L184,300 Z"/>
+  <rect id="base" fill="#6b7280" x="152" y="316" width="96" height="42" rx="6"/>
+  <path id="contact" fill="#3f4652" d="M176,358 L224,358 L214,378 L186,378 Z"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Blind-test material B1: coffee cup, original artwork (CC0). -->
+  <path id="steam_l" fill="#c9c2b8" d="M150,70 C138,90 162,104 150,126 L160,130 C174,106 150,92 162,74 Z"/>
+  <path id="steam_c" fill="#c9c2b8" d="M196,48 C182,74 212,92 196,122 L208,126 C224,96 194,78 208,52 Z"/>
+  <path id="steam_r" fill="#c9c2b8" d="M242,70 C230,90 254,104 242,126 L252,130 C266,106 242,92 254,74 Z"/>
+  <path id="handle" fill="#3d5a80" d="M280,176 C330,172 336,252 280,252 L280,236 C312,234 312,190 280,192 Z"/>
+  <path id="cup" fill="#3d5a80" d="M110,150 L290,150 L280,262 C276,292 252,306 222,306 L178,306 C148,306 124,292 120,262 Z"/>
+  <ellipse id="coffee" fill="#6f4e37" cx="200" cy="158" rx="84" ry="12"/>
+  <ellipse id="saucer" fill="#98c1d9" cx="200" cy="316" rx="130" ry="18"/>
+</svg>

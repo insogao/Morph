@@ -8,14 +8,14 @@ import { assertOffline, buildOffline, openPreview } from "./browser.mjs";
 const { positionals, values } = parseArgs({
   allowPositionals: true,
   options: { width: { type: "string", default: "1920" }, fps: { type: "string", default: "30" },
-    out: { type: "string", default: "gallery" } },
+    out: { type: "string", default: "gallery" }, "html-only": { type: "boolean", default: false } },
 });
 const width = Number(values.width);
 const height = Math.round(width * 9 / 32) * 2;
 const fps = Number(values.fps);
 if (!Number.isInteger(width) || width < 320 || width > 3840 || width % 2 ||
     !Number.isInteger(fps) || fps < 1 || fps > 120 || positionals.length > 1) {
-  throw new Error("Usage: npm run export -- [scene|all] [--width 1920] [--fps 30] [--out gallery]");
+  throw new Error("Usage: npm run export -- [scene|all] [--width 1920] [--fps 30] [--out gallery] [--html-only]");
 }
 mkdirSync(".morph", { recursive: true });
 mkdirSync(values.out, { recursive: true });
@@ -28,6 +28,13 @@ try {
   const selected = !positionals[0] || positionals[0] === "all" ? scenes : scenes.filter(scene => scene.id === positionals[0]);
   if (!selected.length) throw new Error("No matching scene. Available: " + scenes.map(({ id }) => id).join(", "));
   for (const { id, duration } of selected) {
+    if (values["html-only"]) {
+      // Offline player only (no video): one self-contained file that opens on this scene.
+      const file = join(values.out, id + ".html");
+      writeFileSync(file, buildOffline("dist/index.html", id), "utf8");
+      console.log(id + "  " + file);
+      continue;
+    }
     await page.evaluate(({ id, width, height }) => {
       window.MORPH.select(id);
       window.MORPH.resize(width, height);

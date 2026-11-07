@@ -1,5 +1,6 @@
 import { chromium } from "playwright-core";
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { homedir } from "node:os";
 import { resolve, dirname, join, basename } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -46,7 +47,38 @@ export function buildOffline(input = "dist/index.html", sceneId) {
   return html;
 }
 
+/** Newest modification time under the given folders (source of the built player). */
+function newest(dirs) {
+  let t = 0;
+  const walk = dir => {
+    if (!existsSync(dir)) return;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p); else t = Math.max(t, statSync(p).mtimeMs);
+    }
+  };
+  dirs.forEach(walk);
+  return t;
+}
+
+/**
+ * The render tools play the BUILT player in dist/. Rebuild when any source is newer, so frames,
+ * pops and seek checks never show a stale scene. A failing build (type error) stops here, loudly.
+ */
+export function ensureBuilt() {
+  const built = existsSync("dist/index.html") ? statSync("dist/index.html").mtimeMs : 0;
+  if (newest(["app", "lab", "demos", "examples", "packages", "fixtures"]) <= built) return;
+  console.error("[morph] sources changed since the last build: running npm run build …");
+  try {
+    execSync("npm run build", { stdio: ["ignore", "ignore", "pipe"] });
+  } catch (error) {
+    throw new Error("npm run build failed — fix it before rendering:\n" + (error.stderr?.toString() ?? "") + (error.stdout?.toString() ?? ""));
+  }
+}
+
 export async function openPreview(input = ".morph/preview.html") {
+  ensureBuilt();
   writeFileSync(input, buildOffline(), "utf8");
   const browser = await chromium.launch({ executablePath: browserPath(), args: ["--enable-unsafe-swiftshader"] });
   try {

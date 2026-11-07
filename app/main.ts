@@ -2,7 +2,10 @@ import "./style.css";
 import { renderAt, type MorphScene } from "../packages/morph-engine/src/core/scene";
 
 const modules = import.meta.glob<{ scene: MorphScene }>(["../demos/*/scene.ts", "../examples/*/scene.ts", "../lab/*/scene.ts"], { eager: true });
-const scenes = Object.values(modules).map(({ scene }) => scene);
+// Morph Master scenes ("MM01 · …") come first, in number order; the older Creative Morph pieces follow.
+const isMM = (scene: MorphScene) => /^MM\d+/.test(scene.title);
+const scenes = Object.values(modules).map(({ scene }) => scene)
+  .sort((a, b) => Number(isMM(b)) - Number(isMM(a)) || (isMM(a) ? a.title.localeCompare(b.title) : 0));
 const stage = document.querySelector<HTMLCanvasElement>("#stage")!;
 const context = stage.getContext("2d", { alpha: false })!;
 const nav = document.querySelector<HTMLElement>("#scenes")!;
@@ -92,7 +95,16 @@ function saveFrame() {
 }
 
 if (current) {
+  let group = "";
   for (const scene of scenes) {
+    const next = isMM(scene) ? "Morph Master" : "Creative Morph";
+    if (next !== group) {
+      group = next;
+      const label = document.createElement("span");
+      label.className = "group";
+      label.textContent = group;
+      nav.append(label);
+    }
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.scene = scene.id;

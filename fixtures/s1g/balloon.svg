@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- G1 hot-air balloon, original artwork for Morph Master generalisation tests (CC0). -->
+  <path id="envelope" fill="#ff7a59" d="M200,40 C276,40 324,96 324,162 C324,214 290,250 262,276 C250,288 244,296 240,304 L160,304 C156,296 150,288 138,276 C110,250 76,214 76,162 C76,96 124,40 200,40 Z"/>
+  <path id="stripe_l" fill="#ffd166" d="M170,44 C138,70 124,120 126,170 C128,220 146,262 166,304 L180,304 C164,262 150,220 150,170 C150,122 162,76 186,42 Z"/>
+  <path id="stripe_r" fill="#ffd166" d="M230,44 C262,70 276,120 274,170 C272,220 254,262 234,304 L220,304 C236,262 250,220 250,170 C250,122 238,76 214,42 Z"/>
+  <path id="rope_l" fill="#5b4636" d="M162,304 L170,304 L184,344 L178,346 Z"/>
+  <path id="rope_r" fill="#5b4636" d="M238,304 L230,304 L216,344 L222,346 Z"/>
+  <rect id="basket" fill="#a0673c" x="172" y="344" width="56" height="40" rx="5"/>
+  <circle id="sun" fill="#ffb627" cx="330" cy="62" r="18"/>
+</svg>

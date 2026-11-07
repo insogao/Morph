@@ -10,5 +10,5 @@
     "skipLibCheck": true,
     "isolatedModules": true
   },
-  "include": ["app/**/*.ts", "demos/**/*.ts", "examples/**/*.ts", "packages/**/*.ts", "tests/**/*.ts"]
+  "include": ["glb.d.ts", "vite.config.ts", "app/**/*.ts", "demos/**/*.ts", "examples/**/*.ts", "lab/**/*.ts", "fixtures/**/*.ts", "tools/**/*.ts", "packages/**/*.ts", "tests/**/*.ts"]
 }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- G2 umbrella, original artwork for Morph Master generalisation tests (CC0). -->
+  <path id="tip" fill="#3b3f5c" d="M196,46 L204,46 L203,72 L197,72 Z"/>
+  <path id="canopy" fill="#7c6cf0" d="M70,214 C70,124 128,70 200,70 C272,70 330,124 330,214 Q304.0,190.0 278.0,214 Q252.0,190.0 226.0,214 Q200.0,190.0 174.0,214 Q148.0,190.0 122.0,214 Q96.0,190.0 70.0,214 Z"/>
+  <path id="shaft" fill="#3b3f5c" d="M196,200 L204,200 L204,330 L196,330 Z"/>
+  <path id="handle" fill="#3b3f5c" d="M196,326 L204,326 L204,346 C204,364 228,364 228,346 L228,338 L236,338 L236,346 C236,374 196,374 196,346 Z"/>
+</svg>

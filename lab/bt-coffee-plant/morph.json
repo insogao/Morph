@@ -1,0 +1,143 @@
+{
+  "id": "bt-coffee-plant",
+  "title": "MM90 · 咖啡杯 → 盆栽 (coffee cup → potted plant)",
+  "place": {
+    "at": [
+      640,
+      372
+    ],
+    "height": 600
+  },
+  "timing": {
+    "cause": 1.2,
+    "morph": 4.2,
+    "payoff": 2.6
+  },
+  "cause": [
+    {
+      "type": "pulse",
+      "parts": [
+        "steam_l",
+        "steam_c",
+        "steam_r"
+      ],
+      "amount": 0.3
+    }
+  ],
+  "mappings": [
+    {
+      "from": "cup",
+      "to": "pot",
+      "window": [
+        0.0,
+        0.62
+      ],
+      "ease": "inOut"
+    },
+    {
+      "from": "coffee",
+      "to": "soil",
+      "window": [
+        0.02,
+        0.62
+      ],
+      "ease": "inOut"
+    },
+    {
+      "from": "saucer",
+      "to": "tray",
+      "window": [
+        0.05,
+        0.66
+      ],
+      "ease": "inOut"
+    },
+    {
+      "from": "handle",
+      "to": "rim",
+      "window": [
+        0.06,
+        0.68
+      ],
+      "ease": "inOut"
+    },
+    {
+      "from": "steam_c",
+      "to": [
+        "stem",
+        "leaf_c"
+      ],
+      "window": [
+        0.12,
+        0.95
+      ],
+      "stagger": 0.1,
+      "ease": "in"
+    },
+    {
+      "from": "steam_l",
+      "to": "leaf_l",
+      "window": [
+        0.16,
+        0.97
+      ],
+      "ease": "in"
+    },
+    {
+      "from": "steam_r",
+      "to": "leaf_r",
+      "window": [
+        0.2,
+        1.0
+      ],
+      "ease": "in"
+    }
+  ],
+  "payoff": [
+    {
+      "type": "wiggle",
+      "parts": [
+        "leaf_l"
+      ],
+      "pivot": [
+        198,
+        186
+      ],
+      "amount": 0.12,
+      "rate": 0.9,
+      "phase": 0
+    },
+    {
+      "type": "wiggle",
+      "parts": [
+        "leaf_r"
+      ],
+      "pivot": [
+        208,
+        160
+      ],
+      "amount": 0.12,
+      "rate": 0.9,
+      "phase": 1.6
+    },
+    {
+      "type": "wiggle",
+      "parts": [
+        "leaf_c"
+      ],
+      "pivot": [
+        206,
+        112
+      ],
+      "amount": 0.08,
+      "rate": 0.9,
+      "phase": 0.8
+    }
+  ],
+  "look": {
+    "background": "#f4f1ea",
+    "ink": "#2b3240",
+    "accent": "#40916c",
+    "label": "MORPH MASTER · BLIND TEST B1"
+  }
+}

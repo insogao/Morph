@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- S1 flower, original artwork for Morph Master (CC0). Part ids are the semantic contract. -->
+  <path id="stem" fill="#2f7d4f" d="M195,190 C190,260 204,320 196,392 L206,392 C214,320 200,260 207,190 Z"/>
+  <path id="leaf_l" fill="#4aa564" d="M198,300 C160,292 132,264 122,232 C160,234 188,262 198,300 Z"/>
+  <path id="leaf_r" fill="#4aa564" d="M202,332 C240,324 268,298 280,266 C242,268 214,294 202,332 Z"/>
+  <g transform="translate(200 165)">
+    <path id="petal_1" fill="#ff6b4a" d="M0,-18 C-40,-40 -52,-100 0,-128 C52,-100 40,-40 0,-18 Z"/>
+    <path id="petal_2" fill="#ff8a5c" transform="rotate(72)" d="M0,-18 C-40,-40 -52,-100 0,-128 C52,-100 40,-40 0,-18 Z"/>
+    <path id="petal_3" fill="#ff6b4a" transform="rotate(144)" d="M0,-18 C-40,-40 -52,-100 0,-128 C52,-100 40,-40 0,-18 Z"/>
+    <path id="petal_4" fill="#ff8a5c" transform="rotate(216)" d="M0,-18 C-40,-40 -52,-100 0,-128 C52,-100 40,-40 0,-18 Z"/>
+    <path id="petal_5" fill="#ff6b4a" transform="rotate(288)" d="M0,-18 C-40,-40 -52,-100 0,-128 C52,-100 40,-40 0,-18 Z"/>
+    <circle id="center" fill="#ffcc33" r="34"/>
+  </g>
+</svg>

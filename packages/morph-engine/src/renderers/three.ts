@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, SRGBColorSpace, WebGLRenderer, type Camera, type Scene } from "three";
+import { ACESFilmicToneMapping, NoToneMapping, SRGBColorSpace, WebGLRenderer, type Camera, type Scene } from "three";
 
 export interface LayerBounds {
   x: number;
@@ -14,7 +14,8 @@ export class ThreeLayer {
   private width = 0;
   private height = 0;
 
-  constructor() {
+  /** flat: no tone mapping, so flat graphic colours come out exactly as authored (card space, title-design looks). */
+  constructor(options: { flat?: boolean } = {}) {
     try {
       this.renderer = new WebGLRenderer({
         canvas: this.canvas, alpha: true, antialias: true, preserveDrawingBuffer: true,
@@ -24,8 +25,8 @@ export class ThreeLayer {
     }
     this.renderer.setClearColor(0, 0);
     this.renderer.outputColorSpace = SRGBColorSpace;
-    this.renderer.toneMapping = ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.17;
+    this.renderer.toneMapping = options.flat ? NoToneMapping : ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = options.flat ? 1 : 1.17;
   }
 
   composite(context: CanvasRenderingContext2D, scene: Scene, camera: Camera, bounds: LayerBounds) {

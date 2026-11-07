@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- S1 bird (side view, wings raised and swept back), original artwork for Morph Master (CC0). Pairs with fish.svg. -->
+  <path id="wing_far" fill="#25329a" d="M236,194 C232,160 216,128 186,104 C216,120 244,150 258,194 Z"/>
+  <path id="tail" fill="#25329a" d="M120,214 C100,206 78,196 46,198 C66,210 78,216 84,224 C74,232 62,240 50,252 C80,248 102,236 122,226 Z"/>
+  <path id="body" fill="#3a4fc4" d="M112,220 C134,192 200,182 262,190 C290,192 312,198 326,210 C318,230 292,244 252,248 C192,254 132,248 112,220 Z"/>
+  <path id="beak" fill="#ffb020" d="M324,204 L356,212 L324,220 Z"/>
+  <path id="wing_near" fill="#2b3aa0" d="M208,198 C198,152 174,108 126,72 C176,90 224,130 256,198 Z"/>
+  <g id="feathers" fill="#9fb3ff">
+        <path transform="translate(211.2 178.1) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(196.8 159.5) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(182.4 141.0) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(168.0 122.4) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(153.6 103.8) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(139.2 85.3) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(221.7 183.0) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(207.3 164.4) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(192.9 145.9) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(178.5 127.3) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(164.1 108.7) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(232.2 187.9) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(217.8 169.3) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+    <path transform="translate(203.4 150.8) rotate(-40)" d="M0,0 C-6,-4 -6,-14 0,-20 C6,-14 6,-4 0,0 Z"/>
+  </g>
+  <circle id="eye" fill="#10161c" cx="300" cy="202" r="6"/>
+</svg>
