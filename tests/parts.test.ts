@@ -37,7 +37,7 @@ test("SVG import: ids, nested transforms, fills, circles and groups", () => {
   assert.equal(ant.shape.pieces.length, 2, "group id collects both children");
   assert.equal(ant.shape.pieces[0].holes.length + ant.shape.pieces[1].holes.length, 0, "overlapping elements never cut holes");
   assert.equal(ant.fill, "#23232b", "fill inherited from the group");
-  assert.deepEqual(doc.issues, { openPaths: [], strokeOnly: [], gradients: [], texts: 0, images: 0, anonymous: 0 });
+  assert.deepEqual(doc.issues, { openPaths: [], strokeOnly: [], gradients: [], texts: 0, images: 0, anonymous: 0, clipped: [], translucent: [], badColors: [], brokenUses: [] });
 });
 
 test("SVG import reports issues an AI must tell the user about", () => {

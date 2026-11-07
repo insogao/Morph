@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- Blind-test material B4 (round 2): a sunflower, drawn the way Figma exports it. Original artwork, CC0. -->
+<g id="Sunflower">
+<path id="stem" d="M249 300C245 380 251 440 247 504H265C269 440 263 380 267 300H249Z" fill="#3A7D44"/>
+<path id="leaf_left" d="M250 400C214 360 160 362 140 386C172 412 222 418 250 400Z" fill="#4C9A52"/>
+<path id="leaf_right" d="M264 440C300 400 354 402 374 426C342 452 292 458 264 440Z" fill="#4C9A52"/>
+<g id="petals">
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(30 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(60 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(90 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(120 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(150 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(180 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(210 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(240 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(270 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(300 256 236)"/>
+<path d="M256 236C240 196 244 150 256 128C268 150 272 196 256 236Z" fill="rgb(242, 183, 5)" transform="rotate(330 256 236)"/>
+</g>
+<circle id="center" cx="256" cy="236" r="48" fill="#5C3D2E"/>
+<circle id="seeds" cx="256" cy="236" r="30" fill="rgb(74, 48, 34)"/>
+</g>
+</svg>

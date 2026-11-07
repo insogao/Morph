@@ -7,6 +7,7 @@
 // GLB / glTF: named parts (nodes with meshes), triangles, world-ish bounds, base colour; skins, textures and
 // animations are reported as warnings (the 3D route uses static geometry and base colours).
 import { readFileSync } from "node:fs";
+import { PNG } from "pngjs";
 import { extname, basename } from "node:path";
 import { parseSvg } from "../packages/morph-engine/src/vector/svg";
 import { signedArea } from "../packages/morph-engine/src/vector/geom";
@@ -46,6 +47,10 @@ function inspectSvg(file: string, text: string): Report {
   if (strokeOnly) warnings.push("Stroke-only shapes: " + issues.strokeOnly.join(", ") + ". Strokes are not morphed as filled outlines.");
   if (issues.gradients.length) warnings.push("Gradient / pattern fills on: " + issues.gradients.join(", ") + ". Geometry morphs; the gradient is replaced by a flat colour.");
   if (issues.texts) warnings.push(issues.texts + " <text> element(s) ignored. Convert text to outlines, or use the text route (tools/glyphs.mjs).");
+  if (issues.clipped.length) warnings.push("Clipped / masked content on: " + issues.clipped.join(", ") + ". Clipping is not applied: geometry outside the clip will show. Flatten clips in the design tool (Illustrator: Object → Clipping Mask → Release + Pathfinder Crop; Figma: Flatten).");
+  if (issues.translucent.length) warnings.push("Translucent parts (opacity < 1): " + issues.translucent.join(", ") + ". They are morphed as opaque colours.");
+  if (issues.badColors.length) warnings.push("Unrecognised colours (drawn black): " + issues.badColors.join("; ") + ".");
+  if (issues.brokenUses.length) warnings.push("<use> references that point nowhere: " + issues.brokenUses.join(", ") + ".");
   if (issues.images) warnings.push(issues.images + " embedded <image> element(s) ignored. Bitmaps need the bitmap route.");
   const heavy = parts.filter(p => p.points > 4000);
   if (heavy.length) warnings.push("Very detailed parts (" + heavy.map(p => p.id).join(", ") + "): consider simplifying for smooth playback.");
@@ -75,11 +80,29 @@ function inspectBitmap(file: string, buf: Buffer): Report {
     if (chunk === "VP8X") { alpha = Boolean(buf[20] & 0x10); width = 1 + buf.readUIntLE(24, 3); height = 1 + buf.readUIntLE(27, 3); }
     else if (chunk === "VP8L") { const b = buf.readUInt32LE(21); width = 1 + (b & 0x3fff); height = 1 + ((b >> 14) & 0x3fff); alpha = Boolean((b >> 28) & 1); }
   }
+  // An alpha CHANNEL is not a cut-out: photos are often saved as RGBA with every pixel opaque. Decode and measure.
+  let transparent = 0, border = 0;
+  if (format === "png" && alpha) {
+    try {
+      const png = PNG.sync.read(buf);
+      let tp = 0, bt = 0, bn = 0;
+      const step = Math.max(1, Math.floor(Math.sqrt(png.width * png.height / 250000)));
+      let count = 0;
+      for (let y = 0; y < png.height; y += step) for (let x = 0; x < png.width; x += step) {
+        const a = png.data[(y * png.width + x) * 4 + 3];
+        count++; if (a < 250) tp++;
+        if (x < step || y < step || x >= png.width - step || y >= png.height - step) { bn++; if (a < 128) bt++; }
+      }
+      transparent = tp / count; border = bn ? bt / bn : 0;
+    } catch { /* undecodable: keep the header verdict */ transparent = 1; border = 1; }
+    if (transparent < 0.01) { alpha = false; warnings.push("Has an alpha channel but is fully opaque: treated as a photo."); }
+    else if (border < 0.5) warnings.push("Partly transparent, but most of the border is opaque (" + Math.round(border * 100) + "% transparent): it may be a photo with holes, not a cut-out subject. Check the outline before tracing.");
+  }
   const kind: Kind = alpha ? "bitmap" : "photo";
   if (!alpha) warnings.push("No transparency: treated as a photo/flat image. Biological 'A becomes B' morphs are not offered; use particles, shatter, tile flip or mask reveal, or provide a cut-out PNG.");
   else warnings.push("Has transparency: the alpha outline can be traced onto the vector track (bitmap route). Inner texture does not follow the outline yet.");
   if (width * height > 4096 * 4096) warnings.push("Very large image; it will be downsampled.");
-  return { file, kind, guide: GUIDE[kind], details: { format, width, height, alpha }, warnings };
+  return { file, kind, guide: GUIDE[kind], details: { format, width, height, alpha, ...(format === "png" ? { transparentShare: Math.round(transparent * 1000) / 1000, transparentBorder: Math.round(border * 1000) / 1000 } : {}) }, warnings };
 }
 
 function inspectGltf(file: string, buf: Buffer): Report {
@@ -125,4 +148,18 @@ const reports = files.map(file => {
   if (ext === ".glb" || ext === ".gltf") return inspectGltf(basename(file), buf);
   return inspectBitmap(basename(file), buf);
 });
-console.log(JSON.stringify(reports.length === 1 ? reports[0] : reports, null, 2));
+// Layer sets: name_full.png + name_<part>.png (or name.png + name_<part>.png) are ONE subject with part layers.
+const pngs = files.filter(f => /\.png$/i.test(f)).map(f => basename(f, ".png"));
+const sets = new Map<string, string[]>();
+for (const name of pngs) {
+  const m = name.match(/^(.+?)_(?!full$)([a-z0-9]+(?:_[a-z0-9]+)*)$/i);
+  if (!m) continue;
+  const base = pngs.find(p => p === m[1] + "_full" || p === m[1]) ? m[1] : null;
+  if (base) sets.set(base, [...(sets.get(base) ?? []), m[2]]);
+}
+const out = [...reports, ...[...sets].map(([base, parts]) => ({
+  file: base + " (layer set)", kind: "bitmap-layers", guide: GUIDE.bitmap,
+  details: { full: pngs.find(p => p === base + "_full" || p === base), parts },
+  warnings: ["A layered subject: trace each layer (tools/trace-layers.ts) and map parts by meaning (references/part-mapping.md); warp each part's texture with a mesh (bitmap guide, 'Per-part morph' recipe, MM81). Layers that the full picture shows but no part file covers (fins painted into the body) can only grow out of their parent part."],
+}))];
+console.log(JSON.stringify(out.length === 1 ? out[0] : out, null, 2));

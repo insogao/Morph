@@ -1,4 +1,4 @@
-import { perimeter, signedArea, type Ring, type Vec2 } from "./geom";
+import { perimeter, pushAll, signedArea, type Ring, type Vec2 } from "./geom";
 import type { Shape } from "./shape";
 import { colorDistance } from "./render";
 
@@ -77,7 +77,7 @@ export function describeShape(shape: Shape): Descriptor {
     const m = ringMoments(piece.outer), sign = Math.sign(m[0]);
     for (let i = 0; i < 6; i++) acc[i] += sign * m[i];
     per += perimeter(piece.outer);
-    pts.push(...piece.outer);
+    pushAll(pts, piece.outer);
   }
   const area = acc[0], ellipse = ellipseFromMoments(acc[0], acc[1], acc[2], acc[3], acc[4], acc[5]);
   return {

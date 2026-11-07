@@ -1,4 +1,4 @@
-import { bounds, type Vec2 } from "./geom";
+import { bounds, maxOf, minOf, type Vec2 } from "./geom";
 import { morphShapes, type Frame, type MorphOptions, type ShapeMorph } from "./morph";
 import { fromPath, mapShape, type Shape } from "./shape";
 
@@ -122,7 +122,7 @@ export function morphWords(a: readonly Slot[], b: readonly Slot[], options: Word
   const usedA = new Set(pairs.map(p => p[0])), usedB = new Set(pairs.map(p => p[1]));
   const orderOf = (x: number) => {
     const xs = b.length ? b.map(s => s.center[0]) : a.map(s => s.center[0]);
-    const lo = Math.min(...xs), hi = Math.max(...xs);
+    const lo = minOf(xs), hi = maxOf(xs);
     return hi > lo ? (x - lo) / (hi - lo) : 0;
   };
   const nearest = (p: Vec2, list: readonly Slot[], used: Set<number>) => {

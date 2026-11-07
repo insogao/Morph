@@ -36,9 +36,26 @@ Demos:
 
 - **Same canvas, same light, same scale** for A and B gives the best result. Mismatched styles still morph, but they read as two pictures.
 - **Pixel particles don't move texture within an outline.** The texture travels as coloured cells. For "the painted pattern stretches with the shape", use the mesh warp (MM15).
-- **Mesh warp needs similar subjects.** Between very different shapes (umbrella → octopus) the interior map folds. Use particles or shatter there.
+- **Mesh warp needs similar subjects. Measure before you use it:** `meshQuality(mesh).worstFlipShare`, the worst share of folded triangles over the whole warp.
+  - The boundary follows the vector track's intrinsic in-between, which keeps ordinary concave shapes fold-free (C → disc: 0 %).
+  - Into a deeply concave target the interior still folds (disc → C: 31 %; a C into its mirror image: 60 %), and no relaxation fixes that.
+  - **Above about 2 %, degrade**: morph the silhouette with `fieldMorph` (sdf-field.ts) and cross-fade the texture inside it, split the part into sub-parts and warp each, or use particles or shatter.
 - **Layered art shows a faint seam where parts were split** (anti-aliased layer edges overlap). It's a property of the source layers.
 - **Hidden parts are not invented.** If B shows something A hid (the back of a wing), it comes from B's pixels, not from A's.
 - **Very large images** are cut into more cells. Keep `step` at about 4–6 design px, which gives roughly 4,000–8,000 particles at 60 fps in Chrome.
 
 **Two cut-outs that share a shape** (a hook and a curl, a dome and a head) can also be carried by a match cut instead of a morph. See [../shape-rhyme.md](../shape-rhyme.md) and MM97.
+
+## Per-part morph of a layered subject (MM81, swallow → koi)
+
+`inspect` reports a **layer set** (`name_full.png` plus `name_<part>.png`) as one subject (`kind: "bitmap-layers"`).
+
+1. Trace every layer (`tools/trace-layers.ts`), map the parts by meaning, and give every leftover a fate.
+2. **Pose, then warp.** Move and turn each part as a whole along the creature's path first: a wing folds about its shoulder, and the whole body rides one flight path. Then mesh-warp its texture onto the partner's outline, so the mesh only carries the shape change. A part that must split (two tail streamers into two lobes of one fan) needs its outline cut along the fork; the mesh builder takes one outline per part.
+3. **Colour follows shape, not ahead of it.** If B's paint arrives before B's shape, it reads as "a small koi inflating". Spread the paint from where the change starts (the head) at the speed of the shape.
+4. **Keep moving through the landing.** Start the payoff (the swim) while the warp is finishing; a still moment between them reads as a stop.
+5. Check `meshQuality` (in-betweens only; ≤ 2 % folded triangles).
+
+**Natural motion matters as much as the mapping.**
+- A **fish swims by lateral undulation**. From the side you see the tail fan foreshorten as it beats, and each beat pushes the body forward. An up-down wave is how a dolphin swims; the older koi demo got this wrong.
+- **Birds** glide and bank. Wings fold back towards the body before a dive, and the downstroke is the power stroke.

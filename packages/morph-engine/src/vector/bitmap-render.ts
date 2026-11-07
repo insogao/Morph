@@ -1,4 +1,4 @@
-import type { Vec2 } from "./geom";
+import { maxOf, minOf, type Vec2 } from "./geom";
 import { cellsFromRGBA, flightAt, hash01, matchCells, schedule, type Cell, type Flight, type Placement } from "./bitmap";
 import { fracture } from "../effects/fracture";
 
@@ -89,8 +89,8 @@ export class PixelMorph {
     this.landOf = new Float64Array(this.b.length).fill(Infinity);
     for (const f of this.flights) { this.releaseOf[f.from] = Math.min(this.releaseOf[f.from], f.release); this.landOf[f.to] = Math.min(this.landOf[f.to], f.land); }
   }
-  get first() { return Math.min(...this.releaseOf); }
-  get last() { return Math.max(...this.flights.map(f => f.land)); }
+  get first() { return minOf(this.releaseOf); }
+  get last() { return maxOf(this.flights.map(f => f.land)); }
 
   draw(ctx: CanvasRenderingContext2D, t: number, style: { glow?: number } = {}) {
     if (t <= this.first) { drawArt(ctx, this.artA, this.pa); return; }
@@ -173,7 +173,7 @@ export class ShatterMorph {
    */
   drawCracks(ctx: CanvasRenderingContext2D, progress: number, t = 0) {
     if (progress <= 0) return;
-    const reach = Math.max(...this.edges.map(e => e.db)) * Math.min(1, progress) * 1.02;
+    const reach = maxOf(this.edges.map(e => e.db)) * Math.min(1, progress) * 1.02;
     if (!this.layer) this.layer = document.createElement("canvas").getContext("2d")!;
     const L = this.layer;
     if (L.canvas.width !== ctx.canvas.width || L.canvas.height !== ctx.canvas.height) { L.canvas.width = ctx.canvas.width; L.canvas.height = ctx.canvas.height; }
@@ -198,7 +198,7 @@ export class ShatterMorph {
     L.globalCompositeOperation = "destination-in";
     drawArt(L, this.artA, this.pa);
     L.globalCompositeOperation = "source-over";
-    const life = 1 - Math.max(...this.shards.map(s => s.delay));
+    const life = 1 - maxOf(this.shards.map(s => s.delay));
     const atRest = new Path2D();
     let any = false;
     for (const s of this.shards) if ((t - s.delay) / life <= 0) { any = true; s.poly.forEach((p, i) => i ? atRest.lineTo(p[0], p[1]) : atRest.moveTo(p[0], p[1])); atRest.closePath(); }
@@ -213,7 +213,7 @@ export class ShatterMorph {
   }
 
   draw(ctx: CanvasRenderingContext2D, t: number) {
-    const life = 1 - Math.max(...this.shards.map(s => s.delay));
+    const life = 1 - maxOf(this.shards.map(s => s.delay));
     const local = (s: Shard) => Math.max(0, Math.min(1, (t - s.delay) / life));
     const rest = (keep: (p: number) => boolean) => {
       const path = new Path2D();

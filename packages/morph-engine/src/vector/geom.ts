@@ -158,3 +158,9 @@ export function contains(ring: Ring, p: Vec2): boolean {
   }
   return inside;
 }
+
+/** Min / max of a large list without spreading it into arguments (spread overflows the stack past ~100k items). */
+export function minOf(list: ArrayLike<number>): number { let m = Infinity; for (let i = 0; i < list.length; i++) if (list[i] < m) m = list[i]; return m; }
+export function maxOf(list: ArrayLike<number>): number { let m = -Infinity; for (let i = 0; i < list.length; i++) if (list[i] > m) m = list[i]; return m; }
+/** Append many items without spreading them into arguments. */
+export function pushAll<T>(into: T[], items: ArrayLike<T>): T[] { for (let i = 0; i < items.length; i++) into.push(items[i]); return into; }

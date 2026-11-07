@@ -53,7 +53,7 @@ function newest(dirs) {
   const walk = dir => {
     if (!existsSync(dir)) return;
     for (const e of readdirSync(dir, { withFileTypes: true })) {
-      if (e.name === "node_modules" || e.name.startsWith(".")) continue;
+      if (e.name === "node_modules" || e.name.startsWith(".") || e.name === "eval.json") continue;
       const p = join(dir, e.name);
       if (e.isDirectory()) walk(p); else t = Math.max(t, statSync(p).mtimeMs);
     }
@@ -71,7 +71,7 @@ export function ensureBuilt() {
   if (newest(["app", "lab", "demos", "examples", "packages", "fixtures"]) <= built) return;
   console.error("[morph] sources changed since the last build: running npm run build …");
   try {
-    execSync("npm run build", { stdio: ["ignore", "ignore", "pipe"] });
+    execSync("npm run build", { stdio: ["ignore", "pipe", "pipe"] });
   } catch (error) {
     throw new Error("npm run build failed — fix it before rendering:\n" + (error.stderr?.toString() ?? "") + (error.stdout?.toString() ?? ""));
   }

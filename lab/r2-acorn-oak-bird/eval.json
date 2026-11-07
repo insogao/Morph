@@ -1,0 +1,31 @@
+{
+  "id": "r2-acorn-oak-bird",
+  "updated": "2026-11-07T16:37:51.278Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        11.166666666666677,
+        11.500000000000012
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "blind round 2"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Reviewer (main session): genuinely one continuous shot; every hand-off has a carrier (seedling = trunk, leaf = bird). Weak: the falling leaf is ~20 px and easy to miss; canopy reads as broccoli; bird ends as a speck.",
+    "at": "2026-11-07T16:37:51.272Z",
+    "fingerprint": "f55cd92e0f19"
+  }
+}

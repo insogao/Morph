@@ -1,0 +1,42 @@
+{
+  "id": "bt-coffee-plant",
+  "updated": "2026-11-07T16:09:46.985Z",
+  "code": {
+    "ok": true,
+    "tests": "108 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        0,
+        1.9166666666666659
+      ],
+      [
+        3.5833333333333353,
+        4.166666666666669
+      ],
+      [
+        4.333333333333335,
+        4.75
+      ],
+      [
+        5.333333333333331,
+        7.9999999999999885
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "blind test 1, B1"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "mapping reads; handle passes through a dark lump ~2.9 s (known)",
+    "at": "2026-11-07T16:09:46.985Z"
+  }
+}

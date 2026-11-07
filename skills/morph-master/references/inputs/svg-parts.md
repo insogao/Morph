@@ -22,7 +22,16 @@ npx tsx tools/inspect.ts flower.svg butterfly.svg
   - open paths and stroke-only lines (use the line-art route);
   - gradients (they become a flat colour);
   - `<text>` (convert it to outlines or use the text route);
-  - embedded images.
+  - embedded images;
+  - **clipped or masked groups.** Clipping is not applied, so content outside the clip shows. Flatten clips in the design tool; or, if you can't, replace the clipped shapes with paths already cut to the clip, which you can hand-edit in the SVG;
+  - translucent parts (morphed opaque);
+  - unrecognised colours (drawn black);
+  - broken `<use>` references.
+- **What the importer handles** (Illustrator, Figma and Inkscape exports):
+  - `<style>` sheets with `.class`, `#id` and tag rules (cascade: attribute < rule < inline style);
+  - `<use>` / `<symbol>` with offsets and transforms;
+  - named, `#rgb`, `rgb()`, `hsl()` and `currentColor` colours;
+  - hidden layers (`display:none`) are skipped.
 
 Both drawings should share the same canvas and style. Place them with the same `placeSvg(doc, at, height)`.
 
@@ -90,6 +99,12 @@ These errors are the point. They force a fate for every part.
 | `pulse` | `parts?`, `amount`, `rate` |
 
 There is no "rise" or "drift" cause yet (steam, smoke). Use `pulse` on the wisps with a larger `amount`, or say that it's missing.
+
+**One part made of many pieces** (a `petals` group with 12 petal paths): a 1 → 1 mapping from a solid part splits automatically into every piece (frames `petals#0 … #11`, staggered by `stagger` or 0.4 ÷ pieces), and the reverse merges. Payoffs and causes that name `petals` apply to every piece. You don't need to give each piece its own id unless the pieces have different stories.
+
+**Paint order travels with the part.** Each part's stacking position slides from its place in A's file to its place in B's while it moves. A part that is low in A and high in B can pass over its neighbours mid-way (a petal over the flower's centre for 0.3 s in blind test B4). Fix it by reordering the elements in the SVG, or by timing the windows so the part has landed before it would cross.
+
+**`look`** (optional): `background`, `ink` and `accent` (colours), `ground` (shadow line, boolean), `legend` (the mapping legend, boolean; turn it off when it crosses the art) and `label` (HUD text).
 
 **Split pieces that should stay attached** (side leaves on a stem): give them later windows than the part they hang on, and `bornFrom: "stem@…"`-style origins. Otherwise they grow in mid-air and only attach at the end.
 

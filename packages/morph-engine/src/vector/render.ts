@@ -52,9 +52,20 @@ export function colorDistance(a: string, b: string): number {
   return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]);
 }
 
+/**
+ * Colour in-between. A straight line in OKLab between two far-apart hues (blue → terracotta) passes close to grey:
+ * the "muddy middle" users notice. Interpolate in OKLCH instead — lightness and chroma on a line, hue along the
+ * shorter arc — so the in-between keeps its colourfulness. Near-grey ends have no meaningful hue: use OKLab then.
+ */
 export function mixColor(a: string, b: string, t: number): string {
   const x = hexToLab(a), y = hexToLab(b), u = Math.max(0, Math.min(1, t));
-  return labToHex([x[0] + (y[0] - x[0]) * u, x[1] + (y[1] - x[1]) * u, x[2] + (y[2] - x[2]) * u]);
+  const cx = Math.hypot(x[1], x[2]), cy = Math.hypot(y[1], y[2]);
+  if (Math.min(cx, cy) < 0.03) return labToHex([x[0] + (y[0] - x[0]) * u, x[1] + (y[1] - x[1]) * u, x[2] + (y[2] - x[2]) * u]);
+  const hx = Math.atan2(x[2], x[1]);
+  let dh = Math.atan2(y[2], y[1]) - hx;
+  dh = Math.atan2(Math.sin(dh), Math.cos(dh));
+  const L = x[0] + (y[0] - x[0]) * u, C = cx + (cy - cx) * u, h = hx + dh * u;
+  return labToHex([L, C * Math.cos(h), C * Math.sin(h)]);
 }
 
 // ---- Debug view: the equivalent of a "preview & map" panel. ----

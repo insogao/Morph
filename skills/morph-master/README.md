@@ -43,6 +43,13 @@ This skill teaches an AI to build continuous web morphs, where A turns into B wi
 | ![MM14](../../docs/morph-master/gifs/mm-photo-route.gif) | **MM14 · photo route.** Grid flip, then ink reveal, then blinds. |
 | ![MM15](../../docs/morph-master/gifs/mm-mesh-warp.gif) | **MM15 · texture mesh warp.** A cross-fade compared with warp + blend. |
 
+## Strengths and limits
+
+[references/capabilities.md](references/capabilities.md) maps what works well, with the demos behind each rating, what doesn't, and what hasn't been tested. The short version:
+
+- **Strong:** text, icons and man-made objects, shape rhymes you design, flat 2.5D camera shots, layered paintings, and 3D models with named parts.
+- **Weak:** creatures drawn from scratch as SVG. Ask for reference art instead.
+
 ## The ideas that matter (all learned from measured failures, see the M-reports)
 
 - **Diagnose first.** Every material has its own menu. A photo has no outline, so never promise a photo subject → subject warp; a match cut can still carry it.

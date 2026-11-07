@@ -139,6 +139,17 @@ export function remapParts(a: SvgDoc, b: SvgDoc, mappings: readonly Mapping[]) {
         const mm = morphShapes(EMPTY, t.shape, { vanish: source });
         tracks.push({ id: t.id, to: t, kind: "born", window: sub(i), ease, at: p => mm.at(p) });
       });
+    } else if (from.length === 1 && to.length === 1 && from[0].shape.pieces.length === 1 && to[0].shape.pieces.length >= 3) {
+      // One solid part → a part made of many pieces (a body → a ring of 12 petals). Piece matching alone would pair
+      // ONE piece and grow the rest from points; split instead: every piece gets its own copy of the source.
+      const pieces = to[0].shape.pieces, k = pieces.length, d = (m.stagger ?? 0.4 / k) * (window[1] - window[0]);
+      pieces.forEach((pc, i) => tracks.push({ id: to[0].id + "#" + i, from: from[0], to: to[0], kind: "split", ease,
+        window: [window[0] + i * d, window[1] - (k - 1 - i) * d], at: build(from[0].shape, { pieces: [pc] }) }));
+    } else if (from.length === 1 && to.length === 1 && to[0].shape.pieces.length === 1 && from[0].shape.pieces.length >= 3) {
+      // The reverse: many pieces → one solid part. Each piece flows into the whole target (a merge).
+      const pieces = from[0].shape.pieces, k = pieces.length, d = (m.stagger ?? 0.4 / k) * (window[1] - window[0]);
+      pieces.forEach((pc, i) => tracks.push({ id: to[0].id + "<" + from[0].id + "#" + i, from: from[0], to: to[0], kind: "merge", ease,
+        window: [window[0] + i * d, window[1] - (k - 1 - i) * d], at: build({ pieces: [pc] }, to[0].shape) }));
     } else if (from.length === 1 && to.length === 1) {
       tracks.push({ id: to[0].id, from: from[0], to: to[0], kind: "morph", window, ease, at: build(from[0].shape, to[0].shape) });
     } else if (from.length === 1) {

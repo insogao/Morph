@@ -1,5 +1,5 @@
 import type { MorphScene } from "../core/scene";
-import { rotate, type Vec2 } from "./geom";
+import { maxOf, rotate, type Vec2 } from "./geom";
 import type { Frame } from "./morph";
 import { fillFrame } from "./render";
 import { createSdfRenderer, type Prim, type SdfRenderer } from "../renderers/sdf-gl";
@@ -78,10 +78,11 @@ export function remapScene(spec: MorphSpec, sourceSvg: string, targetSvg: string
   const at = spec.place?.at ?? [640, 360], height = spec.place?.height ?? 540;
   const rawA = parseSvg(sourceSvg), rawB = parseSvg(targetSvg);
   const a = placeSvg(rawA, at, height), b = placeSvg(rawB, at, height);
-  const vb = rawA.viewBox;
-  const toDesign = ([x, y]: Vec2): Vec2 => [at[0] + (x - (vb[0] + vb[2] / 2)) * height / (vb[3] || 1), at[1] + (y - (vb[1] + vb[3] / 2)) * height / (vb[3] || 1)];
+  // [x, y] references are in the coordinates of the drawing they belong to: A's for causes and bornFrom, B's for
+  // payoffs and vanishTo. Each SVG has its own viewBox, so each gets its own mapping (same as placeSvg).
+  const toA = svgToDesign(rawA.viewBox, at, height), toB = svgToDesign(rawB.viewBox, at, height);
   const resolve = (ref: Ref, doc: SvgDoc): Vec2 => {
-    if (typeof ref !== "string") return toDesign(ref);
+    if (typeof ref !== "string") return (doc === b ? toB : toA)(ref);
     const [id, anchor] = ref.split("@");
     const part = doc.parts.find(p => p.id === id) ?? a.parts.find(p => p.id === id) ?? b.parts.find(p => p.id === id);
     if (!part) throw new Error(spec.id + ": no part '" + id + "' for a motion reference.");
@@ -106,7 +107,7 @@ export function remapScene(spec: MorphSpec, sourceSvg: string, targetSvg: string
   const causes = spec.cause ?? [], payoffs = spec.payoff ?? [];
   const pre = causes.map(c => c.type === "sway" ? { ...c, at: resolve(c.pivot, a) } : c);
   const post = payoffs.map(p => "pivot" in p ? { ...p, at: resolve(p.pivot, b) } : "axis" in p ? { ...p, at: resolve(p.axis, b) } : p);
-  const baseId = (id: string) => id.split("<")[0];
+  const baseId = (id: string) => id.split("<")[0].split("#")[0];  // "petals#3" (a piece of a split part) → "petals"
   const inList = (list: string[] | undefined, id: string) => !list || list.includes(baseId(id));
 
   function before(id: string, frame: Frame, time: number): Frame {
@@ -232,7 +233,7 @@ export function remapScene(spec: MorphSpec, sourceSvg: string, targetSvg: string
     return u < 0.5 ? x + (y - x) * e(u * 2) : y + (z - y) * e(u * 2 - 1);
   };
   const rgb = (hex: string): [number, number, number] => /^#[0-9a-f]{6}$/i.test(hex) ? [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255) as [number, number, number] : [0.5, 0.5, 0.5];
-  const groundY = Math.max(...a.parts.flatMap(p => p.shape.pieces.flatMap(q => q.outer.map(v => v[1]))));
+  const groundY = maxOf(a.parts.flatMap(p => p.shape.pieces.flatMap(q => q.outer.map(v => v[1]))));
 
   return {
     id: spec.id,
@@ -316,6 +317,12 @@ const CAUSES = ["sway", "wind", "pulse", "shake"], PAYOFFS = ["flap", "hinge", "
 const STYLES = ["morph", "pose"], EASES = ["linear", "in", "out", "inOut", "inOutQuint", "anticipate"];
 
 /** Check an AI-written morph.json and return it typed, or throw every problem at once. */
+/** SVG user units → design space, exactly as placeSvg places that document (viewBox centred on `at`, scaled to `height`). */
+export function svgToDesign(vb: readonly number[], at: Vec2, height: number): (p: Vec2) => Vec2 {
+  const k = height / (vb[3] || 1), cx = vb[0] + vb[2] / 2, cy = vb[1] + vb[3] / 2;
+  return ([x, y]: Vec2): Vec2 => [at[0] + (x - cx) * k, at[1] + (y - cy) * k];
+}
+
 export function validateSpec(input: unknown): MorphSpec {
   const errors: string[] = [];
   const s = input as Record<string, unknown>;
@@ -325,9 +332,20 @@ export function validateSpec(input: unknown): MorphSpec {
   if (typeof s.id !== "string" || !/^[a-z0-9-]+$/.test(s.id)) errors.push("id: lowercase letters, digits and dashes.");
   if (typeof s.title !== "string") errors.push("title: required string.");
   const place = s.place as Record<string, unknown> | undefined;
+  const posNum = (v: unknown) => typeof v === "number" && Number.isFinite(v) && v > 0;
+  if (place !== undefined && (typeof place !== "object" || place === null || Array.isArray(place))) errors.push("place: { at?, height? }.");
   if (place?.at !== undefined && !isPair(place.at)) errors.push("place.at: [x, y].");
+  if (place?.height !== undefined && !posNum(place.height)) errors.push("place.height: a positive number (design pixels).");
+  const timing = s.timing as Record<string, unknown> | undefined;
+  if (timing !== undefined) {
+    if (typeof timing !== "object" || timing === null || Array.isArray(timing)) errors.push("timing: { cause?, morph?, payoff? } in seconds.");
+    else for (const k of ["cause", "morph", "payoff"]) if (timing[k] !== undefined && !(typeof timing[k] === "number" && Number.isFinite(timing[k] as number) && (timing[k] as number) >= (k === "morph" ? 0.1 : 0))) errors.push(`timing.${k}: seconds (${k === "morph" ? "> 0" : "≥ 0"}).`);
+  }
+  const look = s.look as Record<string, unknown> | undefined;
+  if (look !== undefined) for (const k of ["background", "ink", "accent", "label"]) if (look[k] !== undefined && typeof look[k] !== "string") errors.push(`look.${k}: a string.`);
   if (!Array.isArray(s.mappings) || !s.mappings.length) errors.push("mappings: non-empty array.");
   else (s.mappings as Record<string, unknown>[]).forEach((m, i) => {
+    if (!m || typeof m !== "object" || Array.isArray(m)) { errors.push(`mappings[${i}]: an object { from, to, … }.`); return; }
     const ids = (v: unknown) => typeof v === "string" || (Array.isArray(v) && v.every(x => typeof x === "string"));
     if (!ids(m.from) || !ids(m.to)) errors.push(`mappings[${i}]: from / to are a part id or a list of ids ([] for born / vanish).`);
     if (m.window !== undefined && !(isPair(m.window) && (m.window as number[])[0] >= 0 && (m.window as number[])[1] <= 1 && (m.window as number[])[0] < (m.window as number[])[1]))
@@ -341,6 +359,8 @@ export function validateSpec(input: unknown): MorphSpec {
     if (list === undefined) return;
     if (!Array.isArray(list)) { errors.push(key + ": array."); return; }
     (list as Record<string, unknown>[]).forEach((c, i) => {
+      if (!c || typeof c !== "object" || Array.isArray(c)) { errors.push(`${key}[${i}]: an object { type, … }.`); return; }
+      for (const k of ["amount", "rate", "phase", "turns", "streaks"]) if (c[k] !== undefined && !(typeof c[k] === "number" && Number.isFinite(c[k] as number))) errors.push(`${key}[${i}].${k}: a number.`);
       if (!allowed.includes(c.type as string)) errors.push(`${key}[${i}].type: ${allowed.join(" | ")}.`);
       for (const k of ["pivot", "axis"]) if (c[k] !== undefined && !isRef(c[k])) errors.push(`${key}[${i}].${k}: a part id, "id@anchor", or [x, y].`);
       if (["flap", "hinge", "wiggle", "spin"].includes(c.type as string) && !(Array.isArray(c.parts) && c.parts.length)) errors.push(`${key}[${i}].parts: which parts move.`);
@@ -353,7 +373,8 @@ export function validateSpec(input: unknown): MorphSpec {
   motions("cause", CAUSES);
   motions("payoff", PAYOFFS);
   const render = s.render as Record<string, unknown> | undefined;
-  if (render !== undefined) {
+  if (render !== undefined && (typeof render !== "object" || render === null || Array.isArray(render))) errors.push("render: an object { track, … }.");
+  else if (render !== undefined) {
     if (!["flat", "sdf"].includes(render.track as string)) errors.push("render.track: flat | sdf.");
     if (render.style !== undefined && !["flat", "glossy"].includes(render.style as string)) errors.push("render.style: flat | glossy.");
     if (render.fuse !== undefined && !(Array.isArray(render.fuse) && render.fuse.every(g => Array.isArray(g) && g.every(x => typeof x === "string"))))

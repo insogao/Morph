@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
@@ -31,8 +32,13 @@ test("every lab morph.json validates and builds a scene (all parts have a fate)"
   for (const dir of dirs) {
     const spec = validateSpec(JSON.parse(svg("lab/" + dir + "/morph.json")));
     const scene = readFileSync("lab/" + dir + "/scene.ts", "utf8");
-    const [, a] = scene.match(/import source from "\.\.\/\.\.\/(.+?)\?raw"/)!, [, b] = scene.match(/import target from "\.\.\/\.\.\/(.+?)\?raw"/)!;
-    const built = remapScene(spec, svg(a), svg(b));
+    // The SVGs may live anywhere: "../../fixtures/x.svg?raw" or "./local.svg?raw" next to the scene.
+    const path = (name: string) => {
+      const m = scene.match(new RegExp("import " + name + ' from "(\\.\\.?/[^"]+?)\\?raw"'));
+      assert.ok(m, `lab/${dir}/scene.ts: expected \`import ${name} from "<relative path>.svg?raw"\``);
+      return join("lab", dir, m[1]);
+    };
+    const built = remapScene(spec, svg(path("source")), svg(path("target")));
     assert.equal(built.id, dir);
     assert.ok(built.duration > 3);
   }

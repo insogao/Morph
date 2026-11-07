@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "test": "tsx --test tests/*.test.ts",
     "check:visual": "node tools/visual-check.mjs",
-    "export": "node tools/export.mjs"
+    "export": "node tools/export.mjs",
+    "mm": "tsx tools/mm.ts"
   },
   "dependencies": {
     "flubber": "0.4.2",

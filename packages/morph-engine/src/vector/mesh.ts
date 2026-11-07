@@ -1,5 +1,6 @@
 import { contains, signedArea, type Ring, type Vec2 } from "./geom";
 import { matchRings, type Pin } from "./correspond";
+import { ringPath } from "./morph";
 
 /**
  * Texture mesh warp (pure, testable). A part's texture should FOLLOW its shape as it deforms.
@@ -25,7 +26,10 @@ export interface Mesh {
   weights: Float64Array[];
   boundaryA: Vec2[];
   boundaryB: Vec2[];
+  /** The boundary in-between at t (K samples), from the vector track's interpolation (not a straight line). */
+  path?: (t: number) => Vec2[];
 }
+
 
 /** Bowyer–Watson Delaunay triangulation of a point set (fine for a few thousand points). */
 export function delaunay(points: readonly Vec2[]): Tri[] {
@@ -86,6 +90,10 @@ export function buildMesh(a: Ring, b: Ring, opts: { boundary?: number; spacing?:
   const K = opts.boundary ?? 96, spacing = opts.spacing ?? 16;
   const m = matchRings(a, b, { pins: opts.pins, spacing: 2 });
   const pick = Array.from({ length: K }, (_, k) => Math.floor(k * m.a.length / K));
+  // Straight-line boundaries of concave shapes cross themselves mid-way and fold the mesh; use the vector track's
+  // intrinsic in-between (edge lengths + turning angles), which it already guards against self-intersection.
+  const ring = ringPath(m, "auto");
+  const path = (t: number) => { const r = ring(t); return pick.map(i => r[i]); };
   const boundaryA = pick.map(i => m.a[i]), boundaryB = pick.map(i => m.b[i]);
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const [x, y] of boundaryA) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
@@ -109,7 +117,7 @@ export function buildMesh(a: Ring, b: Ring, opts: { boundary?: number; spacing?:
   };
   const tris = delaunay(rest).filter(inside);
   const weights = rest.map((p, i) => { if (i < K) { const w = new Float64Array(K); w[i] = 1; return w; } return meanValue(boundaryA, p); });
-  return { rest, onB: weights.map(w => apply(w, boundaryB)), tris, weights, boundaryA, boundaryB };
+  return { rest, onB: weights.map(w => apply(w, boundaryB)), tris, weights, boundaryA, boundaryB, path };
 }
 
 /** Vertex positions when the boundary is `ring` (K points, same order as the mesh's boundary). */
@@ -117,8 +125,9 @@ export function meshAt(mesh: Mesh, ring: readonly Vec2[]): Vec2[] {
   return mesh.weights.map(w => apply(w, ring));
 }
 
-/** Boundary between A and B at progress t (straight interpolation of the matched samples). */
+/** Boundary between A and B at progress t (the vector track's in-between; exact A and B at the ends). */
 export function boundaryAt(mesh: Mesh, t: number): Vec2[] {
+  if (mesh.path && t > 0 && t < 1) return mesh.path(t);
   return mesh.boundaryA.map((p, k) => [p[0] + (mesh.boundaryB[k][0] - p[0]) * t, p[1] + (mesh.boundaryB[k][1] - p[1]) * t] as Vec2);
 }
 
@@ -130,4 +139,20 @@ export function flips(mesh: Mesh, pos: readonly Vec2[]): number {
     if (Math.sign(a0) !== Math.sign(a1) || Math.abs(a1) < Math.abs(a0) * 0.02) n++;
   }
   return n;
+}
+
+/**
+ * Worst share of folded triangles over the whole warp (0 = never folds). Mesh warp carries A's interior with
+ * mean-value coordinates; into a deeply concave boundary (a disc into a C, a C into its mirror image) that folds,
+ * and no relaxation fixes it. Measure before using mesh warp: above ~2 %, DEGRADE — morph the silhouette with a
+ * field morph (sdf-field.ts) and cross-fade the texture inside it, or split the part into sub-parts and warp each.
+ */
+export function meshQuality(mesh: Mesh, samples = 16): { worstFlipShare: number; at: number } {
+  // Only the in-betweens count: at t = 0 and t = 1 a scene draws the pictures themselves, not the warped mesh.
+  let worst = 0, at = 0;
+  for (let k = 1; k < samples; k++) {
+    const t = k / samples, share = flips(mesh, meshAt(mesh, boundaryAt(mesh, t))) / Math.max(1, mesh.tris.length);
+    if (share > worst) { worst = share; at = t; }
+  }
+  return { worstFlipShare: worst, at };
 }

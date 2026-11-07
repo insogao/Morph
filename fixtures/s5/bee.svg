@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Blind-test material B4 (round 2): a bee, drawn the way Illustrator exports it. Original artwork, CC0. -->
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 512 512" style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#F2B705;}
+	.st1{fill:#1D1D1B;}
+	.st2{fill:#CFE8F3;}
+	.st3{fill:none;stroke:#1D1D1B;stroke-width:7;stroke-linecap:round;stroke-miterlimit:10;}
+	.st4{display:none;}
+	.st5{fill:#FFFFFF;}
+</style>
+<g id="guides" class="st4">
+	<rect x="0" y="0" style="fill:#FF00FF;" width="512" height="512"/>
+</g>
+<defs>
+	<path id="wingShape" d="M0,0c-38-88-132-84-112-12c14,42,70,32,112,12z"/>
+	<clipPath id="bodyClip">
+		<ellipse cx="256" cy="296" rx="80" ry="106"/>
+	</clipPath>
+</defs>
+<g id="wing_left">
+	<use xlink:href="#wingShape" class="st2" transform="matrix(1 0 0 1 234 214)" style="opacity:0.92;"/>
+</g>
+<g id="wing_right">
+	<use xlink:href="#wingShape" class="st2" transform="matrix(-1 0 0 1 278 214)" style="opacity:0.92;"/>
+</g>
+<ellipse id="body" class="st0" cx="256" cy="296" rx="80" ry="106"/>
+<g id="stripes" clip-path="url(#bodyClip)">
+	<rect x="160" y="252" class="st1" width="192" height="24"/>
+	<rect x="160" y="300" class="st1" width="192" height="24"/>
+	<rect x="160" y="348" class="st1" width="192" height="24"/>
+</g>
+<path id="stinger" class="st1" d="M243,394h26l-13,36L243,394z"/>
+<circle id="head" class="st1" cx="256" cy="172" r="46"/>
+<circle id="eye_l" class="st5" cx="238" cy="164" r="10"/>
+<circle id="eye_r" class="st5" cx="274" cy="164" r="10"/>
+<path id="antenna_l" class="st3" d="M242,132c-8-30-22-42-38-48"/>
+<path id="antenna_r" class="st3" d="M270,132c8-30,22-42,38-48"/>
+</svg>

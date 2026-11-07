@@ -1,4 +1,4 @@
-import { centroid, dist, rotate, selfIntersections, signedArea, wrapPi, type Ring, type Vec2 } from "./geom";
+import { centroid, dist, maxOf, minOf, rotate, selfIntersections, signedArea, wrapPi, type Ring, type Vec2 } from "./geom";
 import { matchRings, rotationCost, type Pin, type RingMatch } from "./correspond";
 import { pieceArea, pieceCentroid, type Piece, type Shape } from "./shape";
 
@@ -152,6 +152,15 @@ function chooseMode(match: RingMatch, mode: Mode): RingTrack {
 }
 
 /** Count crossing pairs among straight point trajectories (sub-sampled). */
+/**
+ * The in-between of one matched ring pair as a function of t (same mode choice as morphShapes: intrinsic unless it
+ * self-intersects). Point i of the result corresponds to point i of match.a / match.b.
+ */
+export function ringPath(match: RingMatch, mode: Mode = "auto"): (t: number) => Ring {
+  const tr = chooseMode(match, mode);
+  return (t: number) => ringAt(tr, t);
+}
+
 function trajectoryCrossings(match: RingMatch, stride = 2): number {
   const segs: Array<[Vec2, Vec2]> = [];
   for (let i = 0; i < match.a.length; i += stride) segs.push([match.a[i], match.b[i]]);
@@ -229,7 +238,7 @@ export function morphShapes(a: Shape, b: Shape, options: MorphOptions = {}): Sha
   const mode = options.mode ?? "auto";
   const all = [...a.pieces, ...b.pieces].flatMap(p => p.outer);
   const xs = all.map(p => p[0]), ys = all.map(p => p[1]);
-  const scale = Math.max(1, Math.hypot(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)));
+  const scale = Math.max(1, Math.hypot(maxOf(xs) - minOf(xs), maxOf(ys) - minOf(ys)));
   const pairs = assign(a.pieces.length, b.pieces.length, (i, j) => pieceCost(a.pieces[i], b.pieces[j], scale), options.pairs ?? []);
   const matchedA = new Set(pairs.map(p => p[0])), matchedB = new Set(pairs.map(p => p[1]));
   const vanish = options.vanish ?? "self";

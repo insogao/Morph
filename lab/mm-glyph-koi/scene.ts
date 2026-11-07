@@ -25,7 +25,8 @@ import eyePng from "./img/eye.png?inline";
  * Material: SDF part field — flat ink → liquid (bevel, gloss, wobble, fusing) → settled body.
  * Texture:  once the silhouette has landed, the gongbi painting washes in from head to tail with an
  *           ink-bleed edge (a spatial reveal of texture, not geometry: geometry cannot invent scales).
- * Payoff:   the painted layers are drawn in thin vertical strips, so the swim wave bends the painting.
+ * Payoff:   a side-view swim: the tail fan foreshortens on every beat (lateral undulation), each beat pushes forward.
+ *           The painted layers are drawn in thin vertical strips, so the same mapping bends the painting.
  */
 
 const traceLayers = traced.layers as unknown as Record<string, { rings: Array<Array<[number, number]>> }>;
@@ -55,7 +56,7 @@ const turned = (s: Shape, a: number): Shape => ({ pieces: s.pieces.map(p => ({ o
 const glyphShapes = pieces.map(p => ({ pieces: [p] }));
 
 const doc = (parts: Array<[string, Shape]>): SvgDoc => ({
-  viewBox: [0, 0, 1280, 720], issues: { openPaths: [], strokeOnly: [], gradients: [], texts: 0, images: 0, anonymous: 0 },
+  viewBox: [0, 0, 1280, 720], issues: { openPaths: [], strokeOnly: [], gradients: [], texts: 0, images: 0, anonymous: 0, clipped: [], translucent: [], badColors: [], brokenUses: [] },
   parts: parts.map(([id, shape], z) => ({ id, shape, fill: "#000000", stroke: null, z, groups: [] })),
 });
 const near = (x: number) => KOI.body.pieces[0].outer.filter(p => Math.abs(p[0] - x) < 20).map(p => p[1]);
@@ -78,16 +79,27 @@ const DROP = [0.2, 1.0], TURN_T = [1.2, 2.4], REMAP = [2.5, 5.0], WASH = [4.9, 6
 const DURATION = 9.0;
 const melt = (t: number) => win(t, 1.1, 2.4), alive = (t: number) => win(t, 3.0, 4.8);
 
-/** The swim wave: tail-weighted sideways bend plus a slow drift to the left. Shared by geometry and texture. */
+/**
+ * The swim, as a fish seen from the SIDE swims: it undulates sideways (towards and away from us), which shows as the
+ * tail fan foreshortening — narrowing and widening — on every beat, while the body barely moves up or down. Each beat
+ * pushes the fish forward. (The first version bent the body up and down: that is how a dolphin swims.) Shared by
+ * geometry and texture, so the painting and its silhouette stay one.
+ */
+const beat = (t: number) => win(t, SWIM[0], SWIM[0] + 0.8) * (0.5 + 0.5 * Math.sin((t - SWIM[0]) * 6.2 - Math.PI / 2));
+const tailRoot = () => box.min[0] + 0.66 * (box.max[0] - box.min[0]);
+/** Horizontal foreshortening of everything behind the tail root (the fan turning towards / away from the camera). */
+const swimX = (x: number, t: number) => { const r = tailRoot(); return x <= r ? x : r + (x - r) * (1 - 0.34 * beat(t)); };
+const swimScale = (x: number, t: number) => x <= tailRoot() ? 1 : 1 - 0.34 * beat(t);
 const swimDy = (x: number, t: number) => {
-  const amp = 13 * win(t, SWIM[0], SWIM[0] + 0.8);
+  const amp = 2.2 * win(t, SWIM[0], SWIM[0] + 0.8);
   const u = Math.max(0, Math.min(1, (x - box.min[0]) / (box.max[0] - box.min[0])));
   return amp * Math.sin(x * 0.014 - t * 6.2) * u * u;
 };
-const swimDx = (t: number) => -110 * smooth((t - SWIM[0] - 0.3) / 2.8);
+// Forward drift, surging a little on each beat.
+const swimDx = (t: number) => -110 * smooth((t - SWIM[0] - 0.3) / 2.8) - 5 * win(t, SWIM[0], SWIM[0] + 0.8) * Math.sin((t - SWIM[0]) * 6.2);
 function swim(frame: Frame, t: number): Frame {
   const dx = swimDx(t);
-  const f = ([x, y]: Vec2): Vec2 => [x + dx, y + swimDy(x, t)];
+  const f = ([x, y]: Vec2): Vec2 => [swimX(x, t) + dx, y + swimDy(x, t)];
   return { pieces: frame.pieces.map(p => ({ outer: p.outer.map(f), holes: p.holes.map(h => h.map(f)) })) };
 }
 
@@ -128,7 +140,8 @@ function painted(ctx: CanvasRenderingContext2D, img: HTMLImageElement, t: number
   // x runs over the art in unscaled design units; each strip lands where `grow` puts it.
   for (let x = Math.max(0, raw.min[0] - 20); x < raw.max[0] + 20; x += strip) {
     const [gx, gy] = grow([x, 0]);
-    layer.drawImage(img, x / ART_SCALE, 0, strip / ART_SCALE + 1, img.height, gx + dx, gy + swimDy(gx + strip * K / 2, t), strip * K + 0.8, h * K);
+    const mid = gx + strip * K / 2;
+    layer.drawImage(img, x / ART_SCALE, 0, strip / ART_SCALE + 1, img.height, swimX(gx, t) + dx, gy + swimDy(mid, t), strip * K * swimScale(mid, t) + 0.8, h * K);
   }
   // Ink-bleed front: everything behind it is painted, ahead of it is still bare body.
   if (front < box.max[0] + 200) {

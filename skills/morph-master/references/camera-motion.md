@@ -17,6 +17,21 @@ For flat art, use **card space** (`renderers/card-space.ts`, MM98):
 
 The 2D camera in `match-cut.ts` is only right for a quick, small match within one flat picture.
 
+### Card-space API
+
+```ts
+import { CardSpace, outline, shapes, fromDesign } from "../../packages/morph-engine/src/renderers/card-space";
+const cs = new CardSpace("#c8283c");                  // scene background
+const desk = cs.set("desk", -Infinity, 2.1);          // a set of cards, visible for t in [from, to)
+cs.card(desk, outline(shapes.disc(2)), "#efe6d4", [0, 6, -36]);      // a card facing +z at [x, y, z]
+cs.card(desk, fromDesign(glyph.shape, 0.011, [640, 360]), "#efe6d4", [3, -2, -14]);  // any vector Shape
+export const PATH: CameraKeys = { pos: [{ t, v: [x, y, z], d?: [vx, vy, vz] }…], target: […], roll: [{ t, v, d? }…], fov: […] };
+cs.path(PATH);
+// in draw(ctx, t): cs.draw(ctx, t)  — poses the camera, swaps sets, renders with real motion blur
+```
+
+Export `PATH` from the scene so `mm profile lab/<id>/scene.ts` can check its speed. A hand-built parallax rig (layers that move with a 2D camera at different rates, as in MM82) is fine for side-scrolling shots, but it cannot yaw, pitch or roll; use card space when the viewpoint itself should turn.
+
 ### Card-space recipe (MM98)
 
 - **Lay each "view" out as a plane facing the camera.** A desk seen from above is simply a card plane the drone looks straight at. Then the next set's rhyme shape can sit in exactly the same place: the moon where the watch face was, the page where the window was.
@@ -52,6 +67,8 @@ The 2D camera in `match-cut.ts` is only right for a quick, small match within on
 - **Ask of every frame of the hand-off: what is the eye looking at, and is it continuous?** That covers the shape, the colour, the edges and the neighbours. The checks (`pops`, `check:visual`) find jumps, not missing in-betweens; those you find by looking at dense frames.
 
 ## The rules
+
+0. **Colour in-betweens keep their colour.** `mixColor` interpolates in OKLCH (lightness and chroma on a line, hue along the shorter arc). A straight OKLab line between far-apart hues passes through grey (blue → terracotta went mauve-grey in blind test B1). `mm qc` flags `muddy` when a change still loses its chroma, for example from a dissolve between two different colours.
 
 1. **Overlap the steps, never chain them.** The next step starts before the current one ends. In a match cut, the hand-off starts while the camera is still arriving and ends after it has left. If you can name the moment where one step stops and the next begins, the change will read as A → B → C.
 2. **Something is always moving.** Run zoom, roll and position as separate curves with different peaks. When the zoom brakes into the rhyme, the roll is at full speed, so momentum carries the hand-off. Even a hold creeps (about 1 % per second).
