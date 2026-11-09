@@ -1,0 +1,27 @@
+{
+  "id": "mm-flower-butterfly",
+  "title": "MM04 · 花 → 蝴蝶（部件映射，M3）",
+  "place": { "at": [600, 372], "height": 560 },
+  "timing": { "cause": 1.0, "morph": 4.0, "payoff": 2.8 },
+  "cause": [
+    { "type": "wind", "direction": "right" },
+    { "type": "sway", "pivot": "stem@bottom", "amount": 0.075 }
+  ],
+  "mappings": [
+    { "from": "petal_2", "to": "wing_ur", "style": "pose", "arc": -70, "window": [0.00, 0.60] },
+    { "from": "petal_5", "to": "wing_ul", "style": "pose", "arc": 70, "window": [0.05, 0.64] },
+    { "from": "petal_3", "to": "wing_lr", "style": "pose", "arc": -40, "window": [0.10, 0.70] },
+    { "from": "petal_4", "to": "wing_ll", "style": "pose", "arc": 40, "window": [0.14, 0.74] },
+    { "from": ["center", "stem", "leaf_l", "leaf_r"], "to": "body", "window": [0.12, 0.72], "stagger": 0.1, "ease": "inOut" },
+    { "from": "petal_1", "to": ["antenna_l", "antenna_r"], "window": [0.42, 0.88], "stagger": 0.12, "ease": "inOut" },
+    { "from": [], "to": ["spot_ur", "spot_ul", "spot_lr", "spot_ll"], "window": [0.70, 0.98], "stagger": 0.14, "ease": "out" }
+  ],
+  "payoff": [
+    { "type": "flap", "parts": ["wing_ul", "wing_ur", "wing_ll", "wing_lr", "spot_ul", "spot_ur", "spot_ll", "spot_lr"], "axis": "body", "amount": 0.62, "rate": 1.7, "lag": ["wing_ll", "wing_lr", "spot_ll", "spot_lr"] },
+    { "type": "wiggle", "parts": ["antenna_l"], "pivot": "body@top", "amount": 0.09, "rate": 1.1 },
+    { "type": "wiggle", "parts": ["antenna_r"], "pivot": "body@top", "amount": -0.09, "rate": 1.1, "phase": 1.3 },
+    { "type": "bob", "amount": 6, "rate": 1.7 },
+    { "type": "lift", "to": [150, -170] }
+  ],
+  "look": { "background": "#f3ede2", "ground": true, "label": "MORPH MASTER · PART REMAP" }
+}

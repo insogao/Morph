@@ -17,3 +17,4 @@ body.render main{margin:0;padding:0;max-width:none}
 body.render header,body.render h2,body.render .transport,body.render #empty{display:none}
 body.render canvas{border:0;border-radius:0;width:100vw;height:100vh;aspect-ratio:auto}
 #empty{margin:10px 0 0;padding:10px 14px;border:1px solid #8a4a3a;border-radius:6px;background:#2a1a16;color:#f2c9b8;font-size:14px}
+.group{flex-basis:100%;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#c1a675;margin-top:6px}

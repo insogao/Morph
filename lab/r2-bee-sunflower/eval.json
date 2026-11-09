@@ -1,0 +1,51 @@
+{
+  "id": "r2-bee-sunflower",
+  "updated": "2026-11-07T16:37:50.730Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        0,
+        0.5833333333333333
+      ],
+      [
+        1.2499999999999998,
+        1.4999999999999996
+      ],
+      [
+        2.9166666666666674,
+        4.166666666666669
+      ],
+      [
+        4.333333333333335,
+        4.583333333333334
+      ],
+      [
+        4.75,
+        5.999999999999996
+      ],
+      [
+        6.166666666666662,
+        6.999999999999992
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "blind round 2"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Reviewer (main session): reads as bee → sunflower; yellow body splits into same-yellow petals, head → centre, stinger → stem, wings → leaves. Weak: a plain yellow egg 2.3–2.6 s before the petals fan out; stripes only shrink away.",
+    "at": "2026-11-07T16:37:50.724Z",
+    "fingerprint": "43da13fc2f61"
+  }
+}

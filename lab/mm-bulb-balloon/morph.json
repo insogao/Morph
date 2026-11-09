@@ -1,0 +1,23 @@
+{
+  "id": "mm-bulb-balloon",
+  "title": "MM07 · 灯泡 → 热气球（泛化测试 G1）",
+  "place": { "at": [640, 372], "height": 600 },
+  "timing": { "cause": 1.1, "morph": 4.0, "payoff": 2.6 },
+  "cause": [
+    { "type": "pulse", "parts": ["glass", "filament", "ray_l", "ray_c", "ray_r"], "amount": 0.05 },
+    { "type": "shake", "amount": 3 }
+  ],
+  "mappings": [
+    { "from": ["ray_l", "ray_c", "ray_r"], "to": "sun", "window": [0.00, 0.62], "stagger": 0.12, "ease": "inOut" },
+    { "from": "glass", "to": "envelope", "window": [0.05, 0.80], "ease": "inOut" },
+    { "from": ["base", "contact"], "to": "basket", "window": [0.12, 0.76], "stagger": 0.15, "ease": "inOut" },
+    { "from": "filament", "to": ["rope_l", "rope_r"], "window": [0.25, 0.86], "stagger": 0.1, "ease": "inOut" },
+    { "from": [], "to": ["stripe_l", "stripe_r"], "bornFrom": "envelope", "window": [0.62, 0.97], "stagger": 0.1, "ease": "out" }
+  ],
+  "payoff": [
+    { "type": "pulse", "parts": ["sun"], "amount": 0.08, "rate": 0.9 },
+    { "type": "bob", "amount": 8, "rate": 0.8 },
+    { "type": "lift", "to": [40, -150] }
+  ],
+  "look": { "background": "#eef3f8", "ink": "#2b3240", "accent": "#ff7a59", "label": "MORPH MASTER · GENERALISATION G1" }
+}

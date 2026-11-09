@@ -1,0 +1,84 @@
+{
+  "id": "mm-hum-logo",
+  "updated": "2026-11-08T05:48:06.204Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": [
+      "pop at 4.767 s   change 0.53   ×6.2 of neighbours",
+      "pop at 2.150 s   change 1.00   ×5.9 of neighbours",
+      "pop at 13.267 s   change 0.51   ×5.4 of neighbours",
+      "pop at 2.167 s   change 0.52   ×3.6 of neighbours"
+    ]
+  },
+  "quality": {
+    "flags": [
+      {
+        "kind": "flat-fill",
+        "from": 13.000000000000023,
+        "to": 14.916666666666703,
+        "worst": 0.97,
+        "note": "one colour fills the frame (a hide moment: fine for ~0.3 s, dead air when long) — here 1.92 s"
+      }
+    ],
+    "holds": [
+      [
+        2.2499999999999996,
+        2.5833333333333335
+      ],
+      [
+        5.666666666666663,
+        5.9166666666666625
+      ],
+      [
+        6.66666666666666,
+        6.833333333333326
+      ],
+      [
+        7.166666666666658,
+        7.416666666666657
+      ],
+      [
+        7.666666666666656,
+        7.833333333333322
+      ],
+      [
+        8.833333333333327,
+        9.166666666666663
+      ],
+      [
+        9.916666666666668,
+        11.083333333333343
+      ],
+      [
+        15.583333333333375,
+        15.91666666666671
+      ],
+      [
+        16.166666666666707,
+        16.33333333333337
+      ],
+      [
+        17.333333333333357,
+        17.666666666666686
+      ],
+      [
+        18.416666666666675,
+        19.083333333333332
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "first motion-logo system cut to user-supplied music"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense zoomed frames of every change: drop squash on the beat, dot→play, triangle strips→bars (staircase), bars move to the track's real levels (4.75 s jump = onset), bars bend into the band (bent pills), band flips into the mic holder (curvature + → 0 → −), cups slide into the capsule, mic folds into the dot; letter rolls crisp; seam beat 16 → 0 identical. Weak: bars → band mid-frames briefly read as / — \\ ; capsule halves show a gap for 1–2 frames before meeting.",
+    "at": "2026-11-08T05:48:06.196Z",
+    "fingerprint": "9f3d191955e9"
+  }
+}

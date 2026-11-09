@@ -1,0 +1,27 @@
+{
+  "id": "mm-umbrella-jellyfish",
+  "title": "MM08 · 雨伞 → 水母（泛化测试 G2）",
+  "place": { "at": [640, 360], "height": 600 },
+  "timing": { "cause": 1.0, "morph": 4.2, "payoff": 3.0 },
+  "cause": [
+    { "type": "sway", "pivot": "handle@bottom", "amount": 0.07 }
+  ],
+  "mappings": [
+    { "from": "tip", "to": [], "vanishTo": "bell@top", "window": [0.00, 0.40], "ease": "in" },
+    { "from": "canopy", "to": "bell", "window": [0.05, 0.80], "ease": "inOut" },
+    { "from": "handle", "to": "tentacle_3", "window": [0.15, 0.85], "ease": "inOut" },
+    { "from": "shaft", "to": ["tentacle_2", "tentacle_4", "tentacle_1", "tentacle_5"], "window": [0.20, 0.92], "stagger": 0.08, "ease": "inOut" },
+    { "from": [], "to": ["eye_l", "eye_r"], "window": [0.72, 0.98], "stagger": 0.1, "ease": "out" }
+  ],
+  "payoff": [
+    { "type": "pulse", "parts": ["bell", "eye_l", "eye_r"], "amount": 0.06, "rate": 1.1 },
+    { "type": "wiggle", "parts": ["tentacle_1"], "pivot": "tentacle_1@top", "amount": 0.12, "rate": 1.1 },
+    { "type": "wiggle", "parts": ["tentacle_2"], "pivot": "tentacle_2@top", "amount": 0.1, "rate": 1.1, "phase": 0.8 },
+    { "type": "wiggle", "parts": ["tentacle_3"], "pivot": "tentacle_3@top", "amount": 0.08, "rate": 1.1, "phase": 1.6 },
+    { "type": "wiggle", "parts": ["tentacle_4"], "pivot": "tentacle_4@top", "amount": 0.1, "rate": 1.1, "phase": 2.4 },
+    { "type": "wiggle", "parts": ["tentacle_5"], "pivot": "tentacle_5@top", "amount": 0.12, "rate": 1.1, "phase": 3.2 },
+    { "type": "bob", "amount": 12, "rate": 1.1 },
+    { "type": "lift", "to": [0, -120] }
+  ],
+  "look": { "background": "#141836", "ink": "#e9e6ff", "accent": "#c9b8ff", "label": "MORPH MASTER · GENERALISATION G2" }
+}

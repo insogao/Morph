@@ -68,3 +68,18 @@ test("space colonization stays deterministic and reaches the outline", () => {
   assert.ok(a.nodes.some(n => n.p[1] < 30), "branches reach the top of the outline");
   assert.ok(a.nodes[0].radius > a.nodes.at(-1)!.radius, "pipe model thickens the root");
 });
+
+test("polygon primitives pack their vertices into the side texture", async () => {
+  const { packPrims: pack, primBounds: bounds } = await import("../packages/morph-engine/src/renderers/sdf-gl");
+  const tri: Prim = { shape: { kind: "polygon", points: [[0, 0], [10, 0], [0, 10]] }, color: [1, 1, 1] };
+  const quad: Prim = { shape: { kind: "polygon", points: [[20, 20], [30, 20], [30, 30], [20, 30]] }, color: [1, 1, 1], op: "subtract" };
+  const polys = { data: new Float32Array(32768 * 4), count: 0 };
+  const data = pack([tri, quad], undefined, polys);
+  assert.equal(data[0], 4, "kind polygon");
+  assert.deepEqual([data[4], data[5]], [0, 3], "first polygon: offset 0, 3 vertices");
+  assert.deepEqual([data[24 + 4], data[24 + 5]], [3, 4], "second polygon starts after the first");
+  assert.equal(polys.count, 7);
+  assert.deepEqual([polys.data[3 * 4], polys.data[3 * 4 + 1]], [20, 20]);
+  assert.deepEqual(Object.values(bounds([tri])!), [0, 0, 10, 10]);
+  assert.throws(() => pack([{ ...tri, shape: { kind: "polygon", points: [[0, 0], [1, 1]] } }]), /at least 3/);
+});

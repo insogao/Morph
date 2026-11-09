@@ -1,0 +1,77 @@
+{
+  "id": "r2-acorn-oak-bird",
+  "title": "MM82 · 橡果 → 橡树 → 落叶 → 飞鸟（一镜到底）",
+  "duration": 11.5,
+  "source": {
+    "name": "橡果（及它长成的橡树）",
+    "parts": [
+      { "id": "nut", "description": "橡果果壳，沿缝裂成两半" },
+      { "id": "cap", "description": "带网纹的壳斗（帽子）" },
+      { "id": "germ", "description": "胚：向下的胚根 + 向上的胚芽", "parent": "nut" },
+      { "id": "trunk", "description": "胚芽长成的主干与枝条（空间殖民生长）", "parent": "germ" },
+      { "id": "crown", "description": "树冠叶团（三色平涂）", "parent": "trunk" },
+      { "id": "hero-leaf", "description": "树冠右下缘那片会先变黄的橡叶", "parent": "crown" }
+    ]
+  },
+  "target": {
+    "name": "小鸟（与留下的橡树）",
+    "parts": [
+      { "id": "oak", "description": "留在画面里的整棵橡树和根系" },
+      { "id": "wings", "description": "两翼，分叉的初级飞羽、深色翼尖" },
+      { "id": "body", "description": "头、身体、扇形尾" },
+      { "id": "beak", "description": "小喙", "parent": "body" },
+      { "id": "shafts", "description": "羽轴线", "parent": "wings" }
+    ]
+  },
+  "candidates": [
+    {
+      "name": "一镜到底：生长 + 叶片翻转成翼",
+      "approach": "一台摄影机从橡果特写随新芽尖升起并拉远成全景；一片叶子先变黄，被一阵风（草浪）吹落，摄影机已在推向它；叶子绕中脉翻到侧面（遮挡时刻），重新展开时两半叶片就是两翼，裂片滑成飞羽，叶脉变羽轴，叶柄变尾，叶尖变喙",
+      "tradeoff": "三段共用一个世界、一台相机、一个时钟，交接点各有载体（芽=干，叶=鸟）；叶→鸟的中间帧依赖翻转遮挡，需要逐帧查看"
+    },
+    {
+      "name": "粒子：树叶散成鸟群再聚成一只",
+      "approach": "风把整个树冠的叶子吹散成粒子轨道，最终聚成一只鸟",
+      "tradeoff": "华丽，但用户要的是“一片叶子”变鸟；树冠被吹光，中间帧主体不清"
+    },
+    {
+      "name": "液态 SDF：叶片融化后长出翅膀",
+      "approach": "叶子落地前在 SDF 场中软化成液滴，再从液滴伸出翼和尾",
+      "tradeoff": "过渡流畅但质感与平涂树不一致（用户偏好平面 2D），且叶的形状特征（裂片）丢失"
+    }
+  ],
+  "selected": "一镜到底：生长 + 叶片翻转成翼",
+  "mappings": [
+    { "from": ["germ"], "to": ["oak"], "carry": "胚芽就是主干的第一段，同一条生长路径；胚根延续成根系" },
+    { "from": ["nut", "cap"], "to": ["oak"], "carry": "果壳两半被变粗的树干推开、留在树根旁；壳斗被新芽顶起后翻落在旁边" },
+    { "from": ["trunk", "crown"], "to": ["oak"], "carry": "同一棵树留在镜头里直到结尾" },
+    { "from": ["hero-leaf"], "to": ["wings"], "carry": "叶片左右两半逐点变成两翼，叶缘裂谷与飞羽缺口在同一弧长位置，所以裂片滑成羽尖；颜色保持琥珀色" },
+    { "from": ["hero-leaf"], "to": ["body", "beak"], "carry": "中脉 + 叶柄变成身体和尾，叶尖就是喙尖" },
+    { "from": ["hero-leaf"], "to": ["shafts"], "carry": "叶脉用同一组轮廓采样点绘制，跟随形变成为羽轴" }
+  ],
+  "beats": [
+    { "at": 0, "event": "橡果特写，雨滴落下", "effects": ["camera creep-in"] },
+    { "at": 0.78, "event": "雨滴击中橡果，橡果摇晃，土壤变湿", "effects": ["splash", "damped rock"] },
+    { "at": 1.35, "event": "果壳裂开，胚根扎入土中，壳斗被顶起翻落", "effects": ["crack", "root growth"] },
+    { "at": 1.8, "event": "新芽带两片小叶升起，摄影机随芽尖抬升并拉远", "effects": ["growth", "camera tilt + pull-out"] },
+    { "at": 3.4, "event": "分枝、叶团冒出，树干按已长出的枝数变粗", "effects": ["space colonization", "live pipe model"] },
+    { "at": 4.3, "event": "最后的叶团仍在长；树冠右下一片叶子开始变黄", "effects": ["prefigure (colour)"] },
+    { "at": 5.45, "event": "一阵风作为草浪从左到右穿过，树冠摇动，黄叶脱落；摄影机已开始推向它", "effects": ["gust wave", "camera push"] },
+    { "at": 6.72, "event": "下落中的叶子绕中脉翻转", "effects": ["tumble"] },
+    { "at": 7.03, "event": "叶子侧面朝向镜头（遮挡时刻），再展开时两半成为两翼", "effects": ["edge-on hide", "point morph with zipper"] },
+    { "at": 7.62, "event": "第一下向下扇翅止住下落，深色翼尖、头和喙成形", "effects": ["flap", "decals"] },
+    { "at": 8.3, "event": "小鸟爬升飞向远方并变小，摄影机拉回全景", "effects": ["depth scale", "camera pull-out"] },
+    { "at": 11.5, "event": "橡树在全景中轻轻摇动，小鸟消失在太阳附近", "effects": ["end hold"] }
+  ],
+  "constraints": [
+    "一个世界、一台摄影机、一个时钟；三段之间没有切换、没有淡入淡出",
+    "每段的开始都在前一段结束之前（叶子变黄时树还在长，叶子变鸟时还在下落，拉远时鸟还在成形）",
+    "平涂 2D 风格，颜色在叶→鸟过程中保持琥珀色",
+    "所有运动是时间的纯函数（可拖动、可倒放）"
+  ],
+  "risks": [
+    { "failure": "树枝在一帧里突然变粗", "fallback": "按“当前已长出的”末梢计算管道模型半径，新末梢权重渐入（修复于 4.0 s 的 pop）" },
+    { "failure": "叶→鸟中间像一片折起来的叶子", "fallback": "先平展成滑翔姿态，再以向下扇翅开始扑翼" },
+    { "failure": "落叶太小看不清", "fallback": "叶子朝镜头飘近（尺度变大）+ 摄影机推近" }
+  ]
+}

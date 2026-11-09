@@ -1,0 +1,134 @@
+{
+  "id": "mm-genesis",
+  "updated": "2026-11-08T12:51:15.236Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": [
+      "pop at 18.333 s   change 1.36   ×2.8 of neighbours"
+    ]
+  },
+  "quality": {
+    "flags": [
+      {
+        "kind": "vanish",
+        "from": 9.583333333333332,
+        "to": 11.25000000000001,
+        "worst": 1,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 22.999999999999943,
+        "to": 23.166666666666607,
+        "worst": 0.88,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 24.666666666666586,
+        "to": 24.83333333333325,
+        "worst": 0.83,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 26.249999999999897,
+        "to": 26.833333333333222,
+        "worst": 0.98,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      }
+    ],
+    "holds": [
+      [
+        0,
+        0.3333333333333333
+      ],
+      [
+        0.6666666666666666,
+        1.4999999999999996
+      ],
+      [
+        1.666666666666666,
+        1.8333333333333326
+      ],
+      [
+        2.166666666666666,
+        2.5
+      ],
+      [
+        2.666666666666667,
+        3.166666666666668
+      ],
+      [
+        3.4166666666666683,
+        5.8333333333333295
+      ],
+      [
+        6.499999999999994,
+        7.249999999999991
+      ],
+      [
+        7.666666666666656,
+        7.916666666666655
+      ],
+      [
+        8.166666666666655,
+        8.499999999999991
+      ],
+      [
+        12.166666666666684,
+        12.666666666666687
+      ],
+      [
+        14.583333333333368,
+        15.250000000000039
+      ],
+      [
+        15.91666666666671,
+        16.833333333333364
+      ],
+      [
+        17.666666666666686,
+        19
+      ],
+      [
+        19.499999999999993,
+        19.666666666666657
+      ],
+      [
+        19.83333333333332,
+        22.49999999999995
+      ],
+      [
+        22.666666666666615,
+        22.83333333333328
+      ],
+      [
+        23.749999999999932,
+        24.499999999999922
+      ],
+      [
+        24.999999999999915,
+        25.749999999999904
+      ],
+      [
+        27.91666666666654,
+        29.749999999999847
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "Genesis 1:1-5 (CUV, public domain): real glyphs 水/光/昼/夜/一; 光's strokes become rays; darkness folds into 一"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense frames checked: 水 with a trembling reflection as the spirit's beat ripples pass, then it sinks; point → hairline 光 → weight 900 → its strokes become rays (field morph) → flood to light; dark rises and halves the world (昼/夜); the divide turns a full circle (evening, morning); the darkness folds onto the real 一. Captions are the verse in real glyphs, colour per character by what lies under it. Pop at 18.33 s = the intended landing of the divide on the downbeat; vanish flags are deliberate exits (水 sinking, 昼夜 out, caption swaps). 3 ms median/frame in Chromium.",
+    "at": "2026-11-08T12:51:15.229Z",
+    "fingerprint": "7f0b8fb6e992"
+  }
+}

@@ -1,10 +1,11 @@
 import { chromium } from "playwright-core";
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { execSync } from "node:child_process";
 import { homedir } from "node:os";
 import { resolve, dirname, join, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 
-function browserPath() {
+export function browserPath() {
   if (process.env.MORPH_CHROMIUM) return process.env.MORPH_CHROMIUM;
   const installed = chromium.executablePath();
   if (existsSync(installed)) return installed;
@@ -24,8 +25,9 @@ function browserPath() {
   throw new Error("Chromium missing. Run npx playwright-core install chromium or set MORPH_CHROMIUM.");
 }
 
-export function buildOffline(input = "dist/index.html", sceneId) {
-  const root = dirname(resolve(input));
+export function buildOffline(input = "dist/index.html", sceneId, assetRoot) {
+  // Asset URLs are absolute ("/assets/…") from the build root; for pages in sub-folders pass assetRoot = "dist".
+  const root = assetRoot ? resolve(assetRoot) : dirname(resolve(input));
   let html = readFileSync(input, "utf8");
   const source = file => readFileSync(join(root, file.replace(/^\//, "")), "utf8");
   html = html.replace(/<script type="module"[^>]*src="([^"]+)"[^>]*><\/script>/g,
@@ -33,7 +35,7 @@ export function buildOffline(input = "dist/index.html", sceneId) {
   html = html.replace(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g,
     (_, file) => "<style>" + source(file) + "</style>");
   if (/<script[^>]+src=|<link[^>]+rel="(?:modulepreload|stylesheet)"/i.test(html)) {
-    throw new Error("Offline build still references a script or stylesheet.");
+    throw new Error("Offline build still references a script or stylesheet (a split chunk or modulepreload). If a second entry was added to vite.config.ts, remove it: pages are exported on their own with tools/export-page.mjs.");
   }
   if (sceneId) {
     if (!/^[a-z0-9-]+$/.test(sceneId)) throw new Error("Invalid scene id.");
@@ -46,7 +48,38 @@ export function buildOffline(input = "dist/index.html", sceneId) {
   return html;
 }
 
+/** Newest modification time under the given folders (source of the built player). */
+function newest(dirs) {
+  let t = 0;
+  const walk = dir => {
+    if (!existsSync(dir)) return;
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name === "node_modules" || e.name.startsWith(".") || e.name === "eval.json") continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) walk(p); else t = Math.max(t, statSync(p).mtimeMs);
+    }
+  };
+  dirs.forEach(walk);
+  return t;
+}
+
+/**
+ * The render tools play the BUILT player in dist/. Rebuild when any source is newer, so frames,
+ * pops and seek checks never show a stale scene. A failing build (type error) stops here, loudly.
+ */
+export function ensureBuilt() {
+  const built = existsSync("dist/index.html") ? statSync("dist/index.html").mtimeMs : 0;
+  if (newest(["app", "lab", "demos", "examples", "packages", "fixtures"]) <= built) return;
+  console.error("[morph] sources changed since the last build: running npm run build …");
+  try {
+    execSync("npm run build", { stdio: ["ignore", "pipe", "pipe"] });
+  } catch (error) {
+    throw new Error("npm run build failed — fix it before rendering:\n" + (error.stderr?.toString() ?? "") + (error.stdout?.toString() ?? ""));
+  }
+}
+
 export async function openPreview(input = ".morph/preview.html") {
+  ensureBuilt();
   writeFileSync(input, buildOffline(), "utf8");
   const browser = await chromium.launch({ executablePath: browserPath(), args: ["--enable-unsafe-swiftshader"] });
   try {

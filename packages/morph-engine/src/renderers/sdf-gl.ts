@@ -20,7 +20,9 @@ export type Shape =
   | { kind: "capsule"; ax: number; ay: number; bx: number; by: number; ra: number; rb: number }
   | { kind: "box"; x: number; y: number; hw: number; hh: number; radius?: number; rotation?: number }
   /** Points p with dot(n, p) < offset are inside. n is normalized by the renderer. */
-  | { kind: "halfplane"; nx: number; ny: number; offset: number };
+  | { kind: "halfplane"; nx: number; ny: number; offset: number }
+  /** Closed polygon (exact distance, even-odd sign). Vertices live in a side texture. Holes: a second polygon with op "subtract". */
+  | { kind: "polygon"; points: readonly Vec2[] };
 
 export interface Prim {
   shape: Shape;
@@ -67,10 +69,15 @@ export interface SdfLook {
   seed?: number;
   /** Global alpha of the layer. */
   opacity?: number;
+  /** Flat 2D look: solid colour with smooth-union silhouettes, no bevel, lighting or highlights. */
+  flat?: boolean;
 }
 
 export const SDF_MAX_PRIMS = 512;
 const TEXELS = 6;
+/** Total polygon vertices per draw, stored one per texel in a POLY_W-wide texture. */
+export const SDF_MAX_POLY_VERTS = 32768;
+const POLY_W = 1024;
 
 const vertex = `#version 300 es
 void main() {
@@ -111,6 +118,7 @@ float vnoise(vec2 p) {
 
 const fieldFragment = common + `
 uniform highp sampler2D uPrims;
+uniform highp sampler2D uPolys;
 uniform int uCount;
 uniform float uTime;
 uniform float uSeed;
@@ -143,7 +151,25 @@ float sdBox(vec2 p, vec2 b, float r) {
   vec2 d = abs(p) - b + r;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
 }
+vec2 polyVert(int i) { return texelFetch(uPolys, ivec2(i % ${POLY_W}, i / ${POLY_W}), 0).xy; }
+float sdPolygon(vec2 p, int start, int count) {
+  vec2 v0 = polyVert(start);
+  float d = dot(p - v0, p - v0), s = 1.0;
+  vec2 vj = polyVert(start + count - 1);
+  for (int k = 0; k < ${SDF_MAX_POLY_VERTS}; k++) {
+    if (k >= count) break;
+    vec2 vi = polyVert(start + k);
+    vec2 e = vj - vi, w = p - vi;
+    vec2 b = w - e * clamp(dot(w, e) / max(dot(e, e), 1e-12), 0.0, 1.0);
+    d = min(d, dot(b, b));
+    bvec3 c = bvec3(p.y >= vi.y, p.y < vj.y, e.x * w.y > e.y * w.x);
+    if (all(c) || all(not(c))) s = -s;
+    vj = vi;
+  }
+  return s * sqrt(d);
+}
 float shapeDist(vec2 p, float kind, vec4 a, vec4 b) {
+  if (kind > 3.5) return sdPolygon(p, int(a.x + 0.5), int(a.y + 0.5));
   if (kind < 0.5) return sdEllipse(rot(p - a.xy, b.x), max(a.zw, vec2(1e-3)));
   if (kind < 1.5) return sdCapsule(p, a.xy, a.zw, max(b.x, 0.0), max(b.y, 0.0));
   if (kind < 2.5) return sdBox(rot(p - a.xy, b.x), a.zw, b.y);
@@ -211,7 +237,7 @@ uniform float uThickness;
 uniform vec3 uLight;
 uniform vec3 uKey, uAmbTop, uAmbBottom, uRim, uSss, uShadowColor;
 uniform vec2 uShadowOffset;
-uniform float uShadowSoft, uShadowOpacity, uOpacity, uSeed;
+uniform float uShadowSoft, uShadowOpacity, uOpacity, uSeed, uFlat;
 out vec4 pixel;
 
 float heightOf(vec4 f) {
@@ -249,6 +275,11 @@ void main() {
     return;
   }
 
+  if (uFlat > 0.5) {
+    vec3 flatc = texelFetch(uColor, c, 0).rgb;
+    pixel = vec4(flatc * cover + uShadowColor * shadow * (1.0 - cover), cover + shadow * (1.0 - cover)) * uOpacity;
+    return;
+  }
   float h = heightOf(f);
   float hx = heightOf(fieldAt(c + ivec2(1, 0))) - heightOf(fieldAt(c - ivec2(1, 0)));
   float hy = heightOf(fieldAt(c - ivec2(0, 1))) - heightOf(fieldAt(c + ivec2(0, 1)));
@@ -314,12 +345,13 @@ function link(gl: WebGL2RenderingContext, fragment: string) {
   return program;
 }
 
-const KIND = { ellipse: 0, capsule: 1, box: 2, halfplane: 3 } as const;
+const KIND = { ellipse: 0, capsule: 1, box: 2, halfplane: 3, polygon: 4 } as const;
 const OP = { union: 0, subtract: 1, intersect: 2 } as const;
 
 /** Pack primitives into the data-texture layout. Exported for tests. */
-export function packPrims(prims: readonly Prim[], out = new Float32Array(SDF_MAX_PRIMS * TEXELS * 4)) {
+export function packPrims(prims: readonly Prim[], out = new Float32Array(SDF_MAX_PRIMS * TEXELS * 4), polys?: { data: Float32Array; count: number }) {
   if (prims.length > SDF_MAX_PRIMS) throw new RangeError("Too many SDF primitives: " + prims.length);
+  let vertex = 0;
   prims.forEach((prim, i) => {
     const o = i * TEXELS * 4;
     const s = prim.shape;
@@ -327,6 +359,13 @@ export function packPrims(prims: readonly Prim[], out = new Float32Array(SDF_MAX
     if (s.kind === "ellipse") values.push(s.x, s.y, s.rx, s.ry, s.rotation ?? 0, 0, 0, 0);
     else if (s.kind === "capsule") values.push(s.ax, s.ay, s.bx, s.by, s.ra, s.rb, 0, 0);
     else if (s.kind === "box") values.push(s.x, s.y, s.hw, s.hh, s.rotation ?? 0, s.radius ?? 0, 0, 0);
+    else if (s.kind === "polygon") {
+      if (s.points.length < 3) throw new RangeError("Polygon primitive needs at least 3 points (prim " + i + ").");
+      if (vertex + s.points.length > SDF_MAX_POLY_VERTS) throw new RangeError("Too many polygon vertices: simplify the outlines.");
+      if (polys) s.points.forEach(([x, y], k) => { polys.data[(vertex + k) * 4] = x; polys.data[(vertex + k) * 4 + 1] = y; });
+      values.push(vertex, s.points.length, 0, 0, 0, 0, 0, 0);
+      vertex += s.points.length;
+    }
     else values.push(s.nx, s.ny, s.offset, 0, 0, 0, 0, 0);
     const anchor = prim.anchor ?? [0, 0];
     values.push(...prim.color, prim.gloss ?? .3, prim.sss ?? 0, prim.mottle ?? 0, anchor[0], anchor[1],
@@ -336,6 +375,7 @@ export function packPrims(prims: readonly Prim[], out = new Float32Array(SDF_MAX
       out[o + k] = values[k];
     }
   });
+  if (polys) polys.count = vertex;
   return out;
 }
 
@@ -354,6 +394,8 @@ export function primBounds(prims: readonly Prim[]) {
     } else if (s.kind === "box") {
       const r = Math.hypot(s.hw, s.hh) + pad;
       x0 = Math.min(x0, s.x - r); x1 = Math.max(x1, s.x + r); y0 = Math.min(y0, s.y - r); y1 = Math.max(y1, s.y + r);
+    } else if (s.kind === "polygon") {
+      for (const [x, y] of s.points) { x0 = Math.min(x0, x - pad); x1 = Math.max(x1, x + pad); y0 = Math.min(y0, y - pad); y1 = Math.max(y1, y + pad); }
     }
   }
   return Number.isFinite(x0) ? { x0, y0, x1, y1 } : null;
@@ -377,6 +419,12 @@ export function createSdfRenderer(): SdfRenderer {
   const primTex = gl.createTexture()!;
   gl.bindTexture(gl.TEXTURE_2D, primTex);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, TEXELS, SDF_MAX_PRIMS, 0, gl.RGBA, gl.FLOAT, null);
+  for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D, p, gl.NEAREST);
+  const POLY_H = SDF_MAX_POLY_VERTS / POLY_W;
+  const polys = { data: new Float32Array(SDF_MAX_POLY_VERTS * 4), count: 0 };
+  const polyTex = gl.createTexture()!;
+  gl.bindTexture(gl.TEXTURE_2D, polyTex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, POLY_W, POLY_H, 0, gl.RGBA, gl.FLOAT, null);
   for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER]) gl.texParameteri(gl.TEXTURE_2D, p, gl.NEAREST);
   const fbo = gl.createFramebuffer()!;
   const targets = [gl.createTexture()!, gl.createTexture()!, gl.createTexture()!];
@@ -408,9 +456,14 @@ export function createSdfRenderer(): SdfRenderer {
       const m = ctx.getTransform();
       const scale = Math.hypot(m.a, m.b);
       resize(ctx.canvas.width, ctx.canvas.height);
-      packPrims(prims, data);
+      packPrims(prims, data, polys);
       gl.bindTexture(gl.TEXTURE_2D, primTex);
       gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, TEXELS, prims.length, gl.RGBA, gl.FLOAT, data);
+      if (polys.count) {
+        gl.bindTexture(gl.TEXTURE_2D, polyTex);
+        const rows = Math.ceil(polys.count / POLY_W);
+        gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, POLY_W, rows, gl.RGBA, gl.FLOAT, polys.data, 0);
+      }
 
       // Scissor to the primitives plus shadow reach.
       const b = primBounds(prims)!;
@@ -443,6 +496,10 @@ export function createSdfRenderer(): SdfRenderer {
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, primTex);
       gl.uniform1i(U(field, "uPrims"), 0);
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, polyTex);
+      gl.uniform1i(U(field, "uPolys"), 1);
+      gl.activeTexture(gl.TEXTURE0);
       gl.uniform1i(U(field, "uCount"), prims.length);
       gl.uniform1f(U(field, "uTime"), look.time ?? 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -472,6 +529,7 @@ export function createSdfRenderer(): SdfRenderer {
       gl.uniform1f(U(shade, "uShadowSoft"), look.shadowSoftness ?? 8);
       gl.uniform1f(U(shade, "uShadowOpacity"), look.shadowOpacity ?? 0);
       gl.uniform1f(U(shade, "uOpacity"), look.opacity ?? 1);
+      gl.uniform1f(U(shade, "uFlat"), look.flat ? 1 : 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       gl.disable(gl.SCISSOR_TEST);
 
@@ -486,6 +544,7 @@ export function createSdfRenderer(): SdfRenderer {
       gl.deleteProgram(field);
       gl.deleteProgram(shade);
       gl.deleteTexture(primTex);
+      gl.deleteTexture(polyTex);
       targets.forEach(t => gl.deleteTexture(t));
       gl.deleteFramebuffer(fbo);
       gl.getExtension("WEBGL_lose_context")?.loseContext();

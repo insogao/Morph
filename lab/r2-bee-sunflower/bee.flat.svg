@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Flattened copy of fixtures/s5/bee.svg for morphing (original untouched):
+     stripes intersected with the body ellipse (clip released), antennae expanded from 7px round strokes to filled outlines,
+     wing opacity 0.92 dropped (behind the body it reads the same), hidden "guides" layer and <use> defs inlined;
+     antennae and stripes moved just below the head in paint order (they only touch at the head top) so the head stays above the petals while it lands as the flower centre. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<path id="wing_left" fill="#CFE8F3" transform="matrix(1 0 0 1 234 214)" d="M0,0c-38-88-132-84-112-12c14,42,70,32,112,12z"/>
+<path id="wing_right" fill="#CFE8F3" transform="matrix(-1 0 0 1 278 214)" d="M0,0c-38-88-132-84-112-12c14,42,70,32,112,12z"/>
+<ellipse id="body" fill="#F2B705" cx="256" cy="296" rx="80" ry="106"/>
+<path id="stinger" fill="#1D1D1B" d="M243,394h26l-13,36L243,394z"/>
+<path id="antenna_l" fill="#1D1D1B" d="M245.38,131.10L244.10,126.61L242.73,122.39L241.27,118.40L239.72,114.65L238.08,111.14L236.35,107.84L234.54,104.76L232.65,101.88L230.68,99.20L228.64,96.71L226.54,94.40L224.36,92.28L222.12,90.32L219.83,88.53L217.49,86.89L215.11,85.40L212.68,84.05L210.23,82.82L207.74,81.72L205.23,80.72A3.5,3.5 0 0 1 202.77,87.28L205.03,88.17L207.25,89.16L209.42,90.24L211.55,91.43L213.63,92.73L215.67,94.16L217.66,95.72L219.61,97.42L221.51,99.27L223.36,101.29L225.15,103.49L226.90,105.87L228.59,108.45L230.23,111.23L231.80,114.24L233.31,117.47L234.75,120.95L236.12,124.67L237.41,128.65L238.62,132.90A3.5,3.5 0 0 1 245.38,131.10Z"/>
+<path id="antenna_r" fill="#1D1D1B" d="M273.38,132.90L274.59,128.65L275.88,124.67L277.25,120.95L278.69,117.47L280.20,114.24L281.77,111.23L283.41,108.45L285.10,105.87L286.85,103.49L288.64,101.29L290.49,99.27L292.39,97.42L294.34,95.72L296.33,94.16L298.37,92.73L300.45,91.43L302.58,90.24L304.75,89.16L306.97,88.17L309.23,87.28A3.5,3.5 0 0 1 306.77,80.72L304.26,81.72L301.77,82.82L299.32,84.05L296.89,85.40L294.51,86.89L292.17,88.53L289.88,90.32L287.64,92.28L285.46,94.40L283.36,96.71L281.32,99.20L279.35,101.88L277.46,104.76L275.65,107.84L273.92,111.14L272.28,114.65L270.73,118.40L269.27,122.39L267.90,126.61L266.62,131.10A3.5,3.5 0 0 1 273.38,132.90Z"/>
+<g id="stripes" fill="#1D1D1B">
+<path d="M183.22,252H328.78A80,106 0 0 1 334.56,276H177.44A80,106 0 0 1 183.22,252Z"/>
+<path d="M176.06,300H335.94A80,106 0 0 1 333.16,324H178.84A80,106 0 0 1 176.06,300Z"/>
+<path d="M186.29,348H325.71A80,106 0 0 1 311.77,372H200.23A80,106 0 0 1 186.29,348Z"/>
+</g>
+<circle id="head" fill="#1D1D1B" cx="256" cy="172" r="46"/>
+<circle id="eye_l" fill="#FFFFFF" cx="238" cy="164" r="10"/>
+<circle id="eye_r" fill="#FFFFFF" cx="274" cy="164" r="10"/>
+</svg>
