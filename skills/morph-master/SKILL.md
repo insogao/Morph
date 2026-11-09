@@ -92,6 +92,8 @@ Everything goes through one entry point: `npm run mm -- <command>` (run `npm run
 - [references/part-mapping.md](references/part-mapping.md): the general part-mapping method.
 - [references/shape-rhyme.md](references/shape-rhyme.md): match cuts through a shared shape. The shape **and the colour** must match, and the shape is morphed until identical before the swap.
 - [references/capabilities.md](references/capabilities.md): what this skill does well, badly, and not yet — read it before promising anything.
+- [references/scroll-pages.md](references/scroll-pages.md): scroll-driven pages (scrollytelling); the scene is scrubbed by the reader's scroll.
+- [references/music-sync.md](references/music-sync.md): cutting to the user's music: measured beat grid, loop clips, audio clock, motion-logo systems, MP4s per aspect.
 - [references/stages.md](references/stages.md): multi-stage stories, carriers, overlaps, `chain()`, and growth that reads.
 - [references/camera-motion.md](references/camera-motion.md): a real viewpoint camera (2.5D card space, drone), coupled curves, speed, hide moments and motion blur.
 - `references/inputs/*.md`: one guide per material (text, svg-icon, svg-parts, bitmap, photo, model-3d).
@@ -108,6 +110,9 @@ Everything goes through one entry point: `npm run mm -- <command>` (run `npm run
 | `tools/pops.mjs` | Find jumps at 60 fps |
 | `npm run check:visual` | Check that seeking forward and backward gives the same frame |
 | `tools/gif.mjs` | Record a GIF preview |
+| `tools/export-page.mjs`, `tools/page-check.mjs` | Export and check a scroll-driven page (`pages/<name>/`) |
+| `tools/beat-grid.py` | Measure a track's beat, drop and loop windows; cut a loopable clip; band levels |
+| `tools/page-video.mjs` | Record a page as MP4 (exact frames) with the soundtrack, per aspect |
 | `npm run export -- <id> --html-only` | Write the offline deliverable |
 
 **Background:**

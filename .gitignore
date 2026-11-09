@@ -7,3 +7,6 @@ dist/
 gallery/
 # Research material from third-party videos and documents: kept local, not published.
 docs/morph-master/source/
+
+# Music the user supplied for a demo: used locally and in exported pages, never published.
+pages/*/media/

@@ -1,0 +1,225 @@
+{
+  "id": "mm-dao-long",
+  "updated": "2026-11-08T13:29:03.994Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [
+      {
+        "kind": "vanish",
+        "from": 24.916666666666583,
+        "to": 25.24999999999991,
+        "worst": 0.72,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 25.499999999999908,
+        "to": 26.249999999999897,
+        "worst": 0.7,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 79.83333333333316,
+        "to": 80.33333333333313,
+        "worst": 1,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      }
+    ],
+    "holds": [
+      [
+        0,
+        0.49999999999999994
+      ],
+      [
+        1.2499999999999998,
+        2.5
+      ],
+      [
+        3.000000000000001,
+        4.250000000000002
+      ],
+      [
+        19,
+        19.166666666666664
+      ],
+      [
+        19.499999999999993,
+        19.666666666666657
+      ],
+      [
+        21.3333333333333,
+        22.249999999999954
+      ],
+      [
+        23.24999999999994,
+        24.41666666666659
+      ],
+      [
+        26.583333333333226,
+        26.916666666666554
+      ],
+      [
+        28.916666666666526,
+        29.49999999999985
+      ],
+      [
+        31.08333333333316,
+        31.74999999999982
+      ],
+      [
+        32.33333333333316,
+        32.91666666666651
+      ],
+      [
+        33.33333333333319,
+        34.24999999999988
+      ],
+      [
+        34.66666666666656,
+        35.58333333333325
+      ],
+      [
+        35.99999999999993,
+        36.249999999999936
+      ],
+      [
+        36.666666666666615,
+        39.41666666666669
+      ],
+      [
+        40.41666666666672,
+        40.58333333333339
+      ],
+      [
+        40.8333333333334,
+        41.75000000000009
+      ],
+      [
+        43.1666666666668,
+        44.000000000000156
+      ],
+      [
+        44.50000000000017,
+        44.66666666666684
+      ],
+      [
+        45.25000000000019,
+        46.25000000000022
+      ],
+      [
+        46.50000000000023,
+        46.83333333333357
+      ],
+      [
+        47.66666666666693,
+        49.083333333333634
+      ],
+      [
+        49.666666666666984,
+        50.50000000000034
+      ],
+      [
+        51.08333333333369,
+        51.416666666667034
+      ],
+      [
+        52.66666666666707,
+        52.83333333333374
+      ],
+      [
+        57.1666666666672,
+        57.83333333333388
+      ],
+      [
+        59.5000000000006,
+        59.66666666666727
+      ],
+      [
+        59.83333333333394,
+        60.00000000000061
+      ],
+      [
+        66.58333333333391,
+        66.8333333333339
+      ],
+      [
+        67.66666666666718,
+        67.83333333333384
+      ],
+      [
+        71.25000000000031,
+        72.25000000000026
+      ],
+      [
+        74.16666666666681,
+        74.83333333333344
+      ],
+      [
+        76.33333333333336,
+        76.75
+      ],
+      [
+        76.91666666666666,
+        77.74999999999994
+      ],
+      [
+        77.9166666666666,
+        79.49999999999984
+      ],
+      [
+        82.66666666666633,
+        83.24999999999963
+      ],
+      [
+        84.74999999999955,
+        85.41666666666617
+      ],
+      [
+        86.91666666666609,
+        87.49999999999939
+      ],
+      [
+        88.9999999999993,
+        90.7499999999992
+      ],
+      [
+        90.91666666666586,
+        91.3333333333325
+      ],
+      [
+        91.49999999999916,
+        91.74999999999915
+      ],
+      [
+        93.33333333333239,
+        93.99999999999902
+      ],
+      [
+        94.16666666666568,
+        95.08333333333229
+      ],
+      [
+        95.24999999999895,
+        97.7499999999988
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "Daodejing ch.1/11/42/8/25, ~98 s, ~24 effects"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense frames of all five chapters and frames from the exported MP4 checked. Ch1: weight morph, Voronoi shatter on the beat, 名 wiped into dust, double spiral, dust → 门, push through the opening (distance-field). Ch11: spokes lock into the hub, the hole stays still while the wheel turns, hole → vessel mouth, liquid clay vessel (smooth after radius fix), dive into the mouth, door/windows carved, panels fall, light patches with lattice shadows, three emptinesses → one point. Ch42 = MM76. Ch8: ring rains, taiji light half melts (fused liquid), beat drops + rings, tilt down, 道 rises with reflection. Ch25: 人⊂地⊂天⊂道⊂自然 nested pull-back about fixed points, tile flip to a last card. No pops after fixes; vanish flags = intended fades. Real rAF playback 60 fps (max 18.7 ms) in all heavy windows.",
+    "at": "2026-11-08T13:29:03.986Z",
+    "fingerprint": "8f4eec8e5fd9"
+  }
+}

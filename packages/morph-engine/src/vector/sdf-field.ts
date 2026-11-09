@@ -84,3 +84,24 @@ export function fieldMorph(centre: Vec2, half: number, n: number, insideA: (p: V
     },
   };
 }
+
+/**
+ * A fast inside-test for fieldMorph: paint the shape once onto an n × n canvas covering the same region and look the
+ * cells up. Point-in-polygon on every cell of a 340² grid against a glyph took ~750 ms (a visible freeze the first
+ * time a morph runs); a canvas fill takes a few ms. Returns null where there is no canvas (Node tests) — fall back to
+ * your own test then.
+ */
+export function rasterInside(centre: Vec2, half: number, n: number, paint: (ctx: CanvasRenderingContext2D) => void): ((p: Vec2) => boolean) | null {
+  if (typeof OffscreenCanvas === "undefined") return null;
+  const canvas = new OffscreenCanvas(n, n), ctx = canvas.getContext("2d") as unknown as CanvasRenderingContext2D | null;
+  if (!ctx) return null;
+  const cell = 2 * half / n, x0 = centre[0] - half, y0 = centre[1] - half;
+  ctx.setTransform(1 / cell, 0, 0, 1 / cell, -x0 / cell, -y0 / cell);
+  ctx.fillStyle = "#000";
+  paint(ctx);
+  const alpha = ctx.getImageData(0, 0, n, n).data;
+  return ([x, y]) => {
+    const i = Math.floor((x - x0) / cell), j = Math.floor((y - y0) / cell);
+    return i >= 0 && j >= 0 && i < n && j < n && alpha[(j * n + i) * 4 + 3] >= 128;
+  };
+}

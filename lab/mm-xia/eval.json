@@ -1,0 +1,59 @@
+{
+  "id": "mm-xia",
+  "updated": "2026-11-08T07:00:35.165Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        0,
+        1.2499999999999998
+      ],
+      [
+        5.416666666666664,
+        6.999999999999992
+      ],
+      [
+        8.416666666666657,
+        9.083333333333329
+      ],
+      [
+        9.33333333333333,
+        9.75
+      ],
+      [
+        10.000000000000002,
+        10.666666666666673
+      ],
+      [
+        11.583333333333346,
+        12.333333333333352
+      ],
+      [
+        12.833333333333355,
+        13.500000000000027
+      ],
+      [
+        14.166666666666698,
+        15.50000000000004
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "v5: human proportions first (user correction), size = depth"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "亻 fix (user: the 亻 was unclear): after settling, the real vector 俠 is drawn (the traced field had stair-stepped edges, also in the final hold); settle field on a finer grid; 夾 makes room first, then the 亻 rises from 他 at text size, travels the paper lane between 夾 and the text, passes 夾's left edge, and grows up-right into its slot — never over 夾 (it vanished black-on-black before). Lines moved down 28/30 to widen the lane. Remaining: at 11.95 s the small 亻 brushes the first line for a moment.",
+    "at": "2026-11-08T07:00:35.158Z",
+    "fingerprint": "9c2ceac15aa3"
+  }
+}

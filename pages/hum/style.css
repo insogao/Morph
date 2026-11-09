@@ -1,0 +1,9 @@
+:root { --red: #d31036; --ink: #0a0a0a; --cream: #f1ebdf; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--cream); overflow: hidden; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.stage { display: block; width: 100vw; height: 100vh; height: 100svh; cursor: pointer; }
+.start { position: fixed; left: 50%; bottom: max(40px, 5vh); transform: translateX(-50%); display: flex; align-items: center; gap: 10px;
+  border: 0; border-radius: 999px; padding: 14px 22px; background: var(--ink); color: var(--cream); font: 600 16px/1 inherit; font-family: inherit; cursor: pointer; }
+.start .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
+.start[hidden], .foot[hidden] { display: none; }
+.foot { position: fixed; left: 0; right: 0; bottom: 14px; margin: 0; text-align: center; font-size: 12px; letter-spacing: .08em; color: currentColor; opacity: .4; }

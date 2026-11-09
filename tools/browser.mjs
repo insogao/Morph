@@ -5,7 +5,7 @@ import { homedir } from "node:os";
 import { resolve, dirname, join, basename } from "node:path";
 import { pathToFileURL } from "node:url";
 
-function browserPath() {
+export function browserPath() {
   if (process.env.MORPH_CHROMIUM) return process.env.MORPH_CHROMIUM;
   const installed = chromium.executablePath();
   if (existsSync(installed)) return installed;
@@ -25,8 +25,9 @@ function browserPath() {
   throw new Error("Chromium missing. Run npx playwright-core install chromium or set MORPH_CHROMIUM.");
 }
 
-export function buildOffline(input = "dist/index.html", sceneId) {
-  const root = dirname(resolve(input));
+export function buildOffline(input = "dist/index.html", sceneId, assetRoot) {
+  // Asset URLs are absolute ("/assets/…") from the build root; for pages in sub-folders pass assetRoot = "dist".
+  const root = assetRoot ? resolve(assetRoot) : dirname(resolve(input));
   let html = readFileSync(input, "utf8");
   const source = file => readFileSync(join(root, file.replace(/^\//, "")), "utf8");
   html = html.replace(/<script type="module"[^>]*src="([^"]+)"[^>]*><\/script>/g,
@@ -34,7 +35,7 @@ export function buildOffline(input = "dist/index.html", sceneId) {
   html = html.replace(/<link rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g,
     (_, file) => "<style>" + source(file) + "</style>");
   if (/<script[^>]+src=|<link[^>]+rel="(?:modulepreload|stylesheet)"/i.test(html)) {
-    throw new Error("Offline build still references a script or stylesheet.");
+    throw new Error("Offline build still references a script or stylesheet (a split chunk or modulepreload). If a second entry was added to vite.config.ts, remove it: pages are exported on their own with tools/export-page.mjs.");
   }
   if (sceneId) {
     if (!/^[a-z0-9-]+$/.test(sceneId)) throw new Error("Invalid scene id.");

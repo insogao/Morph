@@ -1,0 +1,59 @@
+{
+  "id": "mm-lyric-flight",
+  "updated": "2026-11-08T07:26:09.826Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        0,
+        1.8333333333333326
+      ],
+      [
+        3.000000000000001,
+        3.2500000000000013
+      ],
+      [
+        3.916666666666669,
+        5.58333333333333
+      ],
+      [
+        6.749999999999993,
+        9.833333333333334
+      ],
+      [
+        11.000000000000009,
+        14.166666666666698
+      ],
+      [
+        15.250000000000039,
+        18.333333333333343
+      ],
+      [
+        19.499999999999993,
+        22.666666666666615
+      ],
+      [
+        23.749999999999932,
+        27.58333333333321
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "general lyric rule: piece reuse between lines + route camera, on the beat"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense frames of every change: reused pieces found automatically (辶 relays 道→进→追→过, 亻 你→做, 口 时→叫, plus dots) fly to their new characters and flush red; the donor characters show the gap (进 → 井, 追 → 自) — reuse reads literally; old line recedes to half size fading while the new one forms (overlap; no vanish flags); camera flies the route with a little bank; dashed route draws behind; all on the beat (lands on the downbeat). Original placeholder lines, user's own track. Weak: few big shared pieces per pair with these lines — the effect depends on the lyrics.",
+    "at": "2026-11-08T07:26:09.820Z",
+    "fingerprint": "0d356cf20b5a"
+  }
+}

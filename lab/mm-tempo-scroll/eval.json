@@ -1,0 +1,59 @@
+{
+  "id": "mm-tempo-scroll",
+  "updated": "2026-11-07T18:38:52.890Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [],
+    "holds": [
+      [
+        0,
+        1.0833333333333333
+      ],
+      [
+        1.8333333333333326,
+        2.5
+      ],
+      [
+        3.8333333333333357,
+        4.250000000000002
+      ],
+      [
+        5.416666666666664,
+        5.7499999999999964
+      ],
+      [
+        6.999999999999992,
+        7.333333333333324
+      ],
+      [
+        8.24999999999999,
+        9.083333333333329
+      ],
+      [
+        10.083333333333336,
+        10.500000000000005
+      ],
+      [
+        11.750000000000014,
+        13.000000000000023
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "known",
+    "note": "M7 trend demo: scroll-driven page (pages/tempo)"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Reviewer (main session): landscape and portrait layouts, scrubbed by scroll in a real browser. Weight breathes cleanly (same-structure glyphs); o → ring rhyme reads; letters peel nearest-first into ticks; ring → frame → badge → (closes) → mark → orange end card. Weak: caption letter swaps are briefly blobby mid-scroll; a 0.2 s busy moment at 3.2 s.",
+    "at": "2026-11-07T18:38:52.883Z",
+    "fingerprint": "5cba8735562f"
+  }
+}

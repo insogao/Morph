@@ -1,0 +1,85 @@
+{
+  "id": "mm-dao",
+  "updated": "2026-11-08T13:07:31.799Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [
+      {
+        "kind": "vanish",
+        "from": 2.5,
+        "to": 2.9166666666666674,
+        "worst": 0.91,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 9.916666666666668,
+        "to": 11.416666666666679,
+        "worst": 0.82,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 26.33333333333323,
+        "to": 26.833333333333222,
+        "worst": 1,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      }
+    ],
+    "holds": [
+      [
+        0,
+        0.25
+      ],
+      [
+        1.666666666666666,
+        2.0833333333333326
+      ],
+      [
+        3.2500000000000013,
+        4.333333333333335
+      ],
+      [
+        4.500000000000001,
+        4.916666666666666
+      ],
+      [
+        5.666666666666663,
+        6.999999999999992
+      ],
+      [
+        7.666666666666656,
+        8.583333333333325
+      ],
+      [
+        15.083333333333371,
+        15.91666666666671
+      ],
+      [
+        24.666666666666586,
+        24.916666666666583
+      ],
+      [
+        27.999999999999872,
+        29.749999999999847
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "Daodejing 42: 道→point→一→二→三 (real rectangles) →☰→八卦 (Fu Xi ring)→64 hexagrams→taiji→back to 道"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense frames checked: 道 contracts to a point that draws out the real 一; 一 splits into 二, a bar is born between for 三 (all exact rectangles from Noto); 三 evens into ☰, rises to the top of a ring as the camera pulls back, the seven other trigrams fan out of it in Fu Xi order with their lines breaking into yin; each trigram spreads into eight hexagrams (a second trigram grows outward) — the 64 ring; the taiji grows inside; taiji and ring counter-rotate; everything returns to a point and 道 returns. No pops; vanish flags are the intended collapses (道 → point, ☰ shrinking in the pull-back, the final return). 0.2 ms median/frame.",
+    "at": "2026-11-08T13:07:31.792Z",
+    "fingerprint": "a3ffaed43bd5"
+  }
+}

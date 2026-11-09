@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tempo — find your tempo</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header class="nav">
+    <span class="brand"><span class="mark" aria-hidden="true"></span>Tempo</span>
+    <nav><a href="#how">How it works</a><a class="pill" href="#get">Get Tempo</a></nav>
+  </header>
+  <main>
+    <!-- The story: one sticky canvas, scrubbed by scroll. The sections give the scroll its length and its words. -->
+    <section class="story" id="how" aria-label="How Tempo works">
+      <canvas class="stage" aria-hidden="true"></canvas>
+      <p class="sr">Find your tempo. Focus. Plan. Done. Tempo is a focus timer that turns your day into a rhythm.</p>
+      <div class="hint" aria-hidden="true">scroll</div>
+    </section>
+    <section class="cta" id="get">
+      <h2>Your day, in rhythm.</h2>
+      <p>Timers that plan themselves. Free on iPhone, Android and the web.</p>
+      <a class="pill big" href="#get">Get Tempo</a>
+    </section>
+  </main>
+  <script type="module" src="./main.ts"></script>
+</body>
+</html>

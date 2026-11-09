@@ -1,0 +1,147 @@
+{
+  "id": "mm-and",
+  "updated": "2026-11-08T16:58:24.105Z",
+  "code": {
+    "ok": true,
+    "tests": "110 pass, 0 fail"
+  },
+  "playback": {
+    "deterministic": true,
+    "pops": []
+  },
+  "quality": {
+    "flags": [
+      {
+        "kind": "vanish",
+        "from": 19.666666666666657,
+        "to": 20.083333333333318,
+        "worst": 0.97,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 20.249999999999982,
+        "to": 20.749999999999975,
+        "worst": 0.74,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 20.99999999999997,
+        "to": 21.249999999999968,
+        "worst": 0.68,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 21.499999999999964,
+        "to": 21.74999999999996,
+        "worst": 0.63,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 23.33333333333327,
+        "to": 23.583333333333268,
+        "worst": 0.49,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 23.99999999999993,
+        "to": 24.41666666666659,
+        "worst": 0.56,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 25.083333333333247,
+        "to": 25.833333333333236,
+        "worst": 0.74,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "vanish",
+        "from": 26.499999999999893,
+        "to": 26.74999999999989,
+        "worst": 0.71,
+        "note": "the subject shrinks away, then comes back (a change should carry through, not disappear and reappear)"
+      },
+      {
+        "kind": "muddy",
+        "from": 48.58333333333362,
+        "to": 48.91666666666696,
+        "worst": 0.48,
+        "note": "colours go grey/muddy mid-way (mix in OKLab; don't cross-fade two different colours or stack translucent layers)"
+      }
+    ],
+    "holds": [
+      [
+        0,
+        0.3333333333333333
+      ],
+      [
+        2.9166666666666674,
+        3.166666666666668
+      ],
+      [
+        3.4166666666666683,
+        3.6666666666666687
+      ],
+      [
+        3.8333333333333357,
+        4.000000000000003
+      ],
+      [
+        4.916666666666666,
+        5.083333333333332
+      ],
+      [
+        11.583333333333346,
+        11.833333333333348
+      ],
+      [
+        29.41666666666652,
+        29.83333333333318
+      ],
+      [
+        31.83333333333315,
+        32.08333333333315
+      ],
+      [
+        32.24999999999982,
+        32.416666666666494
+      ],
+      [
+        42.91666666666679,
+        43.083333333333464
+      ],
+      [
+        43.66666666666681,
+        43.833333333333485
+      ],
+      [
+        47.8333333333336,
+        48.083333333333606
+      ],
+      [
+        50.66666666666701,
+        50.91666666666702
+      ],
+      [
+        51.3333333333337,
+        53.08333333333375
+      ]
+    ]
+  },
+  "generalisation": {
+    "material": "novel",
+    "note": "MM78: co-op platformer MV — & splits into E and t; TYPE level of a sentence, SHAPE goo level, 2P split (flat vs 2.5D), DEPTH level of extruded AND, fuse back to &"
+  },
+  "visual": {
+    "verdict": "pass",
+    "notes": "Dense frames checked: title split, all four levels, split screen, merge, orbit, fuse, clear card. Fixed: plank override blocking E's jump, portal pop, meet camera jump, bonk squash step, overlapping split label. Vanish flags are the beat-morphing platforms and the follow camera pulling out; muddy is the tile flip.",
+    "at": "2026-11-08T16:58:24.096Z",
+    "fingerprint": "d47fba6237af"
+  }
+}
